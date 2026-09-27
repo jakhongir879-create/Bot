@@ -24,6 +24,17 @@ Biznesingizning barcha hisobotlarini ko'rsatadigan **Telegram bot** va **Web Das
 
 ---
 
+## ⚡ Eng oson yo'l (Windows)
+
+1. Node.js o'rnating: https://nodejs.org (LTS).
+2. Neon manzili, BotFather tokeni va Telegram ID ni tayyorlang (2–4-qadamlar).
+3. **`ISHGA-TUSHIRISH.bat`** faylini ikki marta bosing.
+4. Notepad ochiladi. Ma'lumotlarni yozing, saqlang va yoping. Qolganini fayl o'zi bajaradi va dashboardni brauzerda ochadi.
+
+Keyingi safar ham shu faylni ikki marta bosish yetarli.
+
+---
+
 ## 1-QADAM. Kerakli dasturlar
 
 1. **Node.js** (20-versiya yoki undan yangi): https://nodejs.org → "LTS" ni yuklab o'rnating.
