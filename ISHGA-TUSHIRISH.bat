@@ -40,30 +40,14 @@ if not exist "backend\node_modules" (
   echo.
   echo [1/3] Paketlar o'rnatilmoqda, bir necha daqiqa kuting...
   call npm run install:all
-  if errorlevel 1 goto :wrongdir
-echo.
-echo [XATO] Bu fayl noto'g'ri joyda turibdi.
-echo Uni ZIP'dan ochilgan papka ichidan ishga tushiring:
-echo o'sha papkada backend va dashboard papkalari bo'lishi kerak.
-pause
-exit /b
-
-:err
+  if errorlevel 1 goto :err
 )
 
 if not exist "backend\.setup-done" (
   echo.
   echo [2/3] Ma'lumotlar bazasi tayyorlanmoqda...
   call npm run db:setup
-  if errorlevel 1 goto :wrongdir
-echo.
-echo [XATO] Bu fayl noto'g'ri joyda turibdi.
-echo Uni ZIP'dan ochilgan papka ichidan ishga tushiring:
-echo o'sha papkada backend va dashboard papkalari bo'lishi kerak.
-pause
-exit /b
-
-:err
+  if errorlevel 1 goto :err
   echo ok> "backend\.setup-done"
 )
 
@@ -71,15 +55,7 @@ if not exist "dashboard\dist" (
   echo.
   echo [3/3] Dashboard tayyorlanmoqda...
   call npm run build
-  if errorlevel 1 goto :wrongdir
-echo.
-echo [XATO] Bu fayl noto'g'ri joyda turibdi.
-echo Uni ZIP'dan ochilgan papka ichidan ishga tushiring:
-echo o'sha papkada backend va dashboard papkalari bo'lishi kerak.
-pause
-exit /b
-
-:err
+  if errorlevel 1 goto :err
 )
 
 echo.
