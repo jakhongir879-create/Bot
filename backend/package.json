@@ -1,0 +1,31 @@
+{
+  "name": "biznes-dashboard-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Biznes hisobotlari uchun Telegram bot va API",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "node --watch src/index.js",
+    "start": "node src/index.js",
+    "db:migrate": "prisma migrate dev --name init",
+    "db:deploy": "prisma migrate deploy",
+    "db:seed": "node prisma/seed.js",
+    "db:studio": "prisma studio"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
+  "dependencies": {
+    "@prisma/client": "6.19.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "exceljs": "^4.4.0",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "node-cron": "^4.6.0",
+    "telegraf": "^4.16.3"
+  },
+  "devDependencies": {
+    "prisma": "6.19.3"
+  }
+}

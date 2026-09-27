@@ -1,0 +1,13 @@
+{
+  "name": "biznes-dashboard-bot",
+  "private": true,
+  "description": "Biznes hisobotlari uchun Telegram bot + Web Dashboard (Uzbek tilida)",
+  "scripts": {
+    "install:all": "npm install --prefix backend && npm install --prefix dashboard",
+    "db:setup": "npm run db:deploy --prefix backend && npm run db:seed --prefix backend",
+    "build": "npm run build --prefix dashboard",
+    "start": "npm start --prefix backend",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:dashboard": "npm run dev --prefix dashboard"
+  }
+}

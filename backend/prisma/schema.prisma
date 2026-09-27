@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  OWNER
+  MANAGER
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  TRANSFER
+  DEBT
+}
+
+// Botdan va dashboarddan foydalana oladigan xodimlar
+model Admin {
+  id         Int       @id @default(autoincrement())
+  telegramId String    @unique
+  name       String
+  username   String?
+  role       Role      @default(MANAGER)
+  isActive   Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  sales      Sale[]
+  expenses   Expense[]
+}
+
+model Category {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  createdAt DateTime  @default(now())
+  products  Product[]
+}
+
+model Product {
+  id         Int        @id @default(autoincrement())
+  name       String
+  sku        String?
+  unit       String     @default("dona")
+  costPrice  Int        @default(0)
+  salePrice  Int        @default(0)
+  stock      Float      @default(0)
+  minStock   Float      @default(0)
+  isActive   Boolean    @default(true)
+  categoryId Int?
+  category   Category?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  saleItems  SaleItem[]
+}
+
+model Customer {
+  id        Int      @id @default(autoincrement())
+  name      String
+  phone     String?
+  note      String?
+  createdAt DateTime @default(now())
+  sales     Sale[]
+}
+
+model Sale {
+  id            Int           @id @default(autoincrement())
+  customerId    Int?
+  customer      Customer?     @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  subtotal      Int
+  discount      Int           @default(0)
+  total         Int
+  costTotal     Int
+  profit        Int
+  paidAmount    Int
+  paymentMethod PaymentMethod @default(CASH)
+  note          String?
+  createdById   Int?
+  createdBy     Admin?        @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt     DateTime      @default(now())
+  items         SaleItem[]
+
+  @@index([createdAt])
+}
+
+model SaleItem {
+  id          Int      @id @default(autoincrement())
+  saleId      Int
+  sale        Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  productId   Int?
+  product     Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productName String
+  quantity    Float
+  price       Int
+  costPrice   Int
+  total       Int
+}
+
+model Expense {
+  id          Int      @id @default(autoincrement())
+  category    String
+  amount      Int
+  note        String?
+  date        DateTime @default(now())
+  createdById Int?
+  createdBy   Admin?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+
+  @@index([date])
+}
