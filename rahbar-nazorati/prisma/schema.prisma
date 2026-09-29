@@ -1,0 +1,235 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  DIRECTOR
+  TOP
+  MIDDLE
+}
+
+enum Priority {
+  PAST
+  ORTA
+  YUQORI
+}
+
+enum TaskStatus {
+  YANGI
+  QABUL_QILINDI
+  JARAYONDA
+  BAJARILDI
+  BAJARILMADI
+  QAYTARILDI
+}
+
+enum FailReason {
+  RESURS_YETMADI
+  BOSHQA_BOLIMGA_BOGLIQ
+  VAQT_YETMADI
+  TOPSHIRIQ_NOANIQ
+  BOSHQA
+}
+
+enum FinanceType {
+  TUSHUM
+  TANNARX
+  XARAJAT
+}
+
+enum GoalCondition {
+  GTE
+  LTE
+}
+
+enum DecisionVerdict {
+  OZINI_OQLADI
+  OQLAMADI
+  HALI_ERTA
+}
+
+enum AiModule {
+  VAZIFALAR
+  FAOLLIK
+  SKLAD
+  MOLIYA
+  UMUMIY
+}
+
+model Company {
+  id               Int      @id @default(autoincrement())
+  name             String
+  industry         String?
+  currency         String   @default("so'm")
+  weeklyReportTime String   @default("09:00")
+  weeklyReportDay  Int      @default(1)
+  monthlyReportDay Int      @default(1)
+  updatedAt        DateTime @updatedAt
+}
+
+model Employee {
+  id                 Int         @id @default(autoincrement())
+  telegramId         String?     @unique
+  fullName           String
+  phone              String      @unique
+  position           String?
+  department         String?
+  role               Role        @default(MIDDLE)
+  managerId          Int?
+  manager            Employee?   @relation("Subordinates", fields: [managerId], references: [id], onDelete: SetNull)
+  subordinates       Employee[]  @relation("Subordinates")
+  isActive           Boolean     @default(true)
+  isStockResponsible Boolean     @default(false)
+  onboarded          Boolean     @default(false)
+  createdAt          DateTime    @default(now())
+  assignedTasks      Task[]      @relation("TaskAssigner")
+  receivedTasks      Task[]      @relation("TaskAssignee")
+  histories          TaskHistory[]
+  files              TaskFile[]
+
+  @@index([managerId])
+}
+
+model Task {
+  id              Int           @id @default(autoincrement())
+  title           String
+  description     String?
+  assignerId      Int
+  assigner        Employee      @relation("TaskAssigner", fields: [assignerId], references: [id])
+  assigneeId      Int
+  assignee        Employee      @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  deadline        DateTime
+  priority        Priority      @default(ORTA)
+  status          TaskStatus    @default(YANGI)
+  progress        Int           @default(0)
+  acceptedAt      DateTime?
+  completedAt     DateTime?
+  qualityScore    Int?
+  returnCount     Int           @default(0)
+  failReason      FailReason?
+  failReasonText  String?
+  remind24Sent    Boolean       @default(false)
+  remind2Sent     Boolean       @default(false)
+  overdueNotified Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  history         TaskHistory[]
+  files           TaskFile[]
+
+  @@index([assigneeId])
+  @@index([assignerId])
+  @@index([status])
+  @@index([deadline])
+}
+
+model TaskHistory {
+  id        Int         @id @default(autoincrement())
+  taskId    Int
+  task      Task        @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  changedBy Int?
+  employee  Employee?   @relation(fields: [changedBy], references: [id], onDelete: SetNull)
+  oldStatus TaskStatus?
+  newStatus TaskStatus
+  comment   String?
+  createdAt DateTime    @default(now())
+
+  @@index([taskId])
+}
+
+model TaskFile {
+  id         Int      @id @default(autoincrement())
+  taskId     Int
+  task       Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  uploadedBy Int
+  uploader   Employee @relation(fields: [uploadedBy], references: [id])
+  fileName   String
+  fileId     String
+  fileType   String   @default("document")
+  isLate     Boolean  @default(false)
+  uploadedAt DateTime @default(now())
+
+  @@index([taskId])
+}
+
+model StockCheck {
+  id          Int              @id @default(autoincrement())
+  checkDate   DateTime
+  warehouse   String
+  responsible String
+  fileName    String
+  totalDiff   Float            @default(0)
+  shortageSum Float            @default(0)
+  surplusSum  Float            @default(0)
+  itemCount   Int              @default(0)
+  createdAt   DateTime         @default(now())
+  items       StockCheckItem[]
+}
+
+model StockCheckItem {
+  id           Int        @id @default(autoincrement())
+  stockCheckId Int
+  stockCheck   StockCheck @relation(fields: [stockCheckId], references: [id], onDelete: Cascade)
+  code         String?
+  name         String
+  systemQty    Float
+  actualQty    Float
+  price        Float      @default(0)
+  diffQty      Float
+  diffSum      Float
+  responsible  String?
+
+  @@index([stockCheckId])
+}
+
+model StrategyGoal {
+  id          Int           @id @default(autoincrement())
+  name        String
+  metric      String
+  category    String?
+  condition   GoalCondition
+  targetValue Float
+  period      String
+  createdAt   DateTime      @default(now())
+}
+
+model FinanceEntry {
+  id         Int         @id @default(autoincrement())
+  month      String
+  type       FinanceType
+  category   String
+  planAmount Float       @default(0)
+  factAmount Float       @default(0)
+  createdAt  DateTime    @default(now())
+
+  @@unique([month, type, category])
+  @@index([month])
+}
+
+model TacticalDecision {
+  id             Int              @id @default(autoincrement())
+  date           DateTime
+  title          String
+  description    String?
+  metric         String
+  category       String?
+  expectedResult String?
+  aiVerdict      DecisionVerdict?
+  aiComment      String?
+  createdAt      DateTime         @default(now())
+}
+
+model AiReport {
+  id        Int      @id @default(autoincrement())
+  module    AiModule
+  period    String
+  question  String?
+  text      String
+  createdAt DateTime @default(now())
+
+  @@index([module, createdAt])
+}
