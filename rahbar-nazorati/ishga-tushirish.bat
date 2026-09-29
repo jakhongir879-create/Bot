@@ -26,6 +26,18 @@ if not exist "node_modules" (
   if errorlevel 1 goto :err
 )
 
+findstr /c:"ep-xxxx" ".env" >nul
+if not errorlevel 1 (
+  echo.
+  echo [XATO] .env faylida hali namunaviy qiymatlar turibdi. Notepad ochiladi - to'ldirib, Ctrl+S bosing.
+  start "" notepad "%~dp0.env"
+  pause
+  exit /b
+)
+
+call npx prisma generate >nul
+if errorlevel 1 goto :err
+
 if not exist ".db-ready" (
   echo.
   echo [2/4] Ma'lumotlar bazasi jadvallari yaratilmoqda...
