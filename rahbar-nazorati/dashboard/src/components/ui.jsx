@@ -1,6 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { X, Sparkles, RefreshCw, Star, BarChart3, Lightbulb, CheckCircle2 } from 'lucide-react';
 import { api } from '../api.js';
 import { formatDateTime, chartColors } from '../utils.js';
+
+const AI_HEADS = [
+  { emoji: '📊', Icon: BarChart3, color: '#2a78d6' },
+  { emoji: '💡', Icon: Lightbulb, color: '#eda100' },
+  { emoji: '✅', Icon: CheckCircle2, color: '#1baf7a' },
+];
 
 export function Loading() {
   return (
@@ -56,7 +63,7 @@ export function Modal({ open, onClose, title, children, wide }) {
             {title}
           </h2>
           <button className="icon-btn" onClick={onClose} aria-label="Yopish">
-            ✕
+            <X size={20} strokeWidth={1.75} />
           </button>
         </div>
         <div style={{ marginTop: 12 }}>{children}</div>
@@ -116,11 +123,13 @@ export function AiText({ text }) {
     <div className="ai-text">
       {lines.map((line, i) => {
         const trimmed = line.trim();
-        const isHead = /^(📊|💡|✅)\s*\S/.test(trimmed) && trimmed.length < 40;
-        if (isHead) {
+        const head = AI_HEADS.find((h) => trimmed.startsWith(h.emoji));
+        if (head && trimmed.length < 40) {
+          const Icon = head.Icon;
           return (
             <span className="ai-head" key={i}>
-              {trimmed.replace(/\*/g, '')}
+              <Icon size={18} strokeWidth={2} color={head.color} />
+              {trimmed.slice(head.emoji.length).replace(/\*/g, '').trim()}
             </span>
           );
         }
@@ -136,7 +145,7 @@ export function AiText({ text }) {
 }
 
 /** Modul bo'yicha oxirgi AI hisobot va "AI tahlil" tugmasi */
-export function AiBlock({ module, title = '🤖 AI tahlil', compact = false }) {
+export function AiBlock({ module, title = 'AI tahlil', compact = false }) {
   const [report, setReport] = useState(null);
   const [enabled, setEnabled] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -170,7 +179,8 @@ export function AiBlock({ module, title = '🤖 AI tahlil', compact = false }) {
     <div className="ai-card">
       <div className="row between wrap" style={{ marginBottom: report || error || !enabled ? 14 : 0 }}>
         <div>
-          <div className="card-title" style={{ fontSize: 17 }}>
+          <div className="card-title row" style={{ fontSize: 17, gap: 8 }}>
+            <Sparkles size={18} strokeWidth={1.75} color="#5e5ce6" />
             {title}
           </div>
           <div className="small muted">
@@ -178,7 +188,8 @@ export function AiBlock({ module, title = '🤖 AI tahlil', compact = false }) {
           </div>
         </div>
         <button className="btn ai" onClick={generate} disabled={busy}>
-          {busy ? 'Tahlil qilinmoqda...' : report ? '🔄 Yangilash' : '🤖 AI tahlil'}
+          {busy ? <RefreshCw size={16} className="spin" /> : report ? <RefreshCw size={16} /> : <Sparkles size={16} />}
+          {busy ? 'Tahlil qilinmoqda...' : report ? 'Yangilash' : 'AI tahlil'}
         </button>
       </div>
       {!enabled && !report && (
@@ -195,6 +206,31 @@ export function AiBlock({ module, title = '🤖 AI tahlil', compact = false }) {
       )}
     </div>
   );
+}
+
+export function StarValue({ value }) {
+  if (value === null || value === undefined) return '—';
+  return (
+    <span className="star-value">
+      {value}
+      <Star size={13} strokeWidth={0} fill="#f5a623" />
+    </span>
+  );
+}
+
+export function Stars({ count }) {
+  if (!count) return '—';
+  return (
+    <span className="star-value">
+      {Array.from({ length: count }, (_, i) => (
+        <Star key={i} size={14} strokeWidth={0} fill="#f5a623" />
+      ))}
+    </span>
+  );
+}
+
+export function StatusDot({ tone }) {
+  return <span className={`status-dot ${tone}`} />;
 }
 
 export function ChartTooltip({ active, payload, label, formatter, labelFormatter }) {

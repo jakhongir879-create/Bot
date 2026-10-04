@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react';
+import { Paperclip } from 'lucide-react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 import { api } from '../api.js';
-import { PageHead, AiBlock, Loading, useAsync, Pill, Modal, Empty, ChartTooltip, useThemeVersion } from '../components/ui.jsx';
+import { PageHead, AiBlock, Loading, useAsync, Pill, Modal, Empty, ChartTooltip, useThemeVersion, Stars, StarValue } from '../components/ui.jsx';
 import { STATUS, PRIORITY, REASONS, formatDate, formatDateTime, num, chartColors } from '../utils.js';
 
 function TaskModal({ id, onClose }) {
@@ -23,7 +24,7 @@ function TaskModal({ id, onClose }) {
               <tr><td className="muted">Holat</td><td><Pill tone={STATUS[t.status].tone}>{STATUS[t.status].label}</Pill> {t.progress}%</td></tr>
               <tr><td className="muted">Qabul qilingan</td><td>{formatDateTime(t.acceptedAt)}</td></tr>
               <tr><td className="muted">Bajarilgan</td><td>{formatDateTime(t.completedAt)}</td></tr>
-              <tr><td className="muted">Sifat bahosi</td><td>{t.qualityScore ? '⭐'.repeat(t.qualityScore) : '—'}</td></tr>
+              <tr><td className="muted">Sifat bahosi</td><td><Stars count={t.qualityScore} /></td></tr>
               <tr><td className="muted">Qaytarilgan</td><td>{t.returnCount} marta</td></tr>
               {t.failReason && <tr><td className="muted">Sabab</td><td>{REASONS[t.failReason]}{t.failReasonText ? ` — ${t.failReasonText}` : ''}</td></tr>}
             </tbody>
@@ -32,7 +33,7 @@ function TaskModal({ id, onClose }) {
             <>
               <div className="section-title" style={{ fontSize: 16 }}>Fayllar</div>
               {t.files.map((f) => (
-                <div key={f.id} className="small">📎 {f.fileName} — {f.uploader.fullName}, {formatDateTime(f.uploadedAt)} {f.isLate && <Pill tone="red">kechikib</Pill>}</div>
+                <div key={f.id} className="small row" style={{ gap: 6 }}><Paperclip size={14} strokeWidth={1.75} /> {f.fileName} — {f.uploader.fullName}, {formatDateTime(f.uploadedAt)} {f.isLate && <Pill tone="red">kechikib</Pill>}</div>
               ))}
             </>
           )}
@@ -158,7 +159,7 @@ export default function Tasks() {
             </div>
 
             <div style={{ marginTop: 16 }}>
-              <AiBlock module="VAZIFALAR" title="🤖 AI tahlil: vazifalar ijrosi" compact />
+              <AiBlock module="VAZIFALAR" title="AI tahlil: vazifalar ijrosi" compact />
             </div>
 
             <div className="section-title">Vazifalar ro'yxati</div>
@@ -185,7 +186,7 @@ export default function Tasks() {
                         <tr key={t.id} className="clickable" onClick={() => setOpenId(t.id)}>
                           <td style={{ minWidth: 220 }}>
                             <b>{t.title}</b>
-                            {t.filesCount > 0 && <span className="muted small"> 📎{t.filesCount}</span>}
+                            {t.filesCount > 0 && <span className="muted small" style={{ marginLeft: 6, whiteSpace: 'nowrap' }}><Paperclip size={12} strokeWidth={1.75} style={{ verticalAlign: -1 }} />{t.filesCount}</span>}
                           </td>
                           <td>
                             {t.assignee.fullName}
@@ -196,7 +197,7 @@ export default function Tasks() {
                           <td><Pill tone={s.tone}>{s.label}</Pill></td>
                           <td><Pill tone={PRIORITY[t.priority].tone}>{PRIORITY[t.priority].label}</Pill></td>
                           <td className={`num ${t.delayDays > 0 ? 'neg' : ''}`}>{t.delayDays > 0 ? `${num(t.delayDays)} kun` : '—'}</td>
-                          <td className="num">{t.qualityScore ? `${t.qualityScore} ⭐` : '—'}</td>
+                          <td className="num"><StarValue value={t.qualityScore} /></td>
                           <td className="small">{t.failReason ? REASONS[t.failReason] : ''}</td>
                         </tr>
                       );

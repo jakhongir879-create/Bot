@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { Download, FileSpreadsheet, Trash2 } from 'lucide-react';
 import { api } from '../api.js';
 import { PageHead, AiBlock, Loading, useAsync, Modal, Empty, toast, Pill } from '../components/ui.jsx';
 import { money, num, formatDate, isoDay } from '../utils.js';
@@ -126,7 +127,7 @@ export default function Stock() {
     <>
       <PageHead title="Sklad sverka" sub="Excel orqali inventarizatsiya natijalarini solishtirish">
         <button className="btn ghost" onClick={downloadTemplate}>
-          ⬇️ Namunaviy shablon
+          <Download size={16} strokeWidth={1.75} /> Namunaviy shablon
         </button>
       </PageHead>
 
@@ -146,7 +147,7 @@ export default function Stock() {
               pickFile(e.dataTransfer.files?.[0]);
             }}
           >
-            <div className="big">📄</div>
+            <div className="big"><FileSpreadsheet size={44} strokeWidth={1.5} color="#1baf7a" /></div>
             <div className="bold" style={{ marginTop: 8 }}>{file ? file.name : 'Excel faylni shu yerga tashlang'}</div>
             <div className="small muted">yoki tanlash uchun bosing · .xlsx, .xls, .csv · 5 MB gacha</div>
             <input ref={inputRef} type="file" accept=".xlsx,.xls,.csv" hidden onChange={(e) => pickFile(e.target.files?.[0])} />
@@ -210,7 +211,7 @@ export default function Stock() {
                         <td className="num pos">{money(c.surplusSum)}</td>
                         <td className={`num bold ${c.totalDiff < 0 ? 'neg' : ''}`}>{money(c.totalDiff)}</td>
                         <td className="num">
-                          <button className="icon-btn" onClick={(e) => { e.stopPropagation(); remove(c.id); }} title="O'chirish">🗑</button>
+                          <button className="icon-btn" onClick={(e) => { e.stopPropagation(); remove(c.id); }} title="O'chirish"><Trash2 size={16} strokeWidth={1.75} /></button>
                         </td>
                       </tr>
                     ))}
@@ -265,7 +266,7 @@ export default function Stock() {
             </div>
 
             <div style={{ marginTop: 16 }}>
-              <AiBlock module="SKLAD" title="🤖 AI tahlil: sklad" compact />
+              <AiBlock module="SKLAD" title="AI tahlil: sklad" compact />
             </div>
           </>
         )

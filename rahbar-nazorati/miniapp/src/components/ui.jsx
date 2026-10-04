@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Inbox, Home, ListChecks, Users, UserRound, Star } from 'lucide-react';
 import { onBackButton } from '../telegram.js';
 import { STATUS, PRIORITY, deadlineTone, formatDateTime, timeLeft, scoreTone } from '../utils.js';
 
@@ -110,10 +111,12 @@ export function Spinner() {
   );
 }
 
-export function Empty({ icon = '📭', children }) {
+export function Empty({ icon: Icon = Inbox, children }) {
   return (
     <div className="empty">
-      <div className="big">{icon}</div>
+      <div className="big">
+        <Icon size={44} strokeWidth={1.5} />
+      </div>
       {children}
     </div>
   );
@@ -143,20 +146,32 @@ export function ToastHost() {
 
 export function BottomNav({ tab, onChange, showTeam }) {
   const items = [
-    { key: 'home', icon: '🏠', label: 'Bosh sahifa' },
-    { key: 'tasks', icon: '📋', label: 'Vazifalar' },
-    ...(showTeam ? [{ key: 'team', icon: '👥', label: 'Jamoa' }] : []),
-    { key: 'profile', icon: '👤', label: 'Profil' },
+    { key: 'home', Icon: Home, label: 'Bosh sahifa' },
+    { key: 'tasks', Icon: ListChecks, label: 'Vazifalar' },
+    ...(showTeam ? [{ key: 'team', Icon: Users, label: 'Jamoa' }] : []),
+    { key: 'profile', Icon: UserRound, label: 'Profil' },
   ];
   return (
     <nav className="nav">
       {items.map((item) => (
         <button key={item.key} className={tab === item.key ? 'active' : ''} onClick={() => onChange(item.key)}>
-          <span className="icon">{item.icon}</span>
+          <span className="icon">
+            <item.Icon size={24} strokeWidth={tab === item.key ? 2.1 : 1.6} />
+          </span>
           {item.label}
         </button>
       ))}
     </nav>
+  );
+}
+
+export function StarValue({ value }) {
+  if (value === null || value === undefined) return '—';
+  return (
+    <span className="star-value">
+      {value}
+      <Star size={16} strokeWidth={0} fill="#f5a623" />
+    </span>
   );
 }
 

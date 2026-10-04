@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../api.js';
-import { Spinner, ScoreRing, TaskCard, Empty, TrendBadge } from './ui.jsx';
+import { Spinner, ScoreRing, TaskCard, Empty, TrendBadge, StarValue } from './ui.jsx';
 import TrendChart from './TrendChart.jsx';
 import { Metric } from './Team.jsx';
 import { fmt } from '../utils.js';
@@ -39,7 +39,7 @@ export default function Profile({ onOpenTask, refreshKey }) {
       <div className="section-title">Shaxsiy statistika (30 kun)</div>
       <div className="metric-grid">
         <Metric label="Muddatida bajarish" value={metrics.onTimeRate === null ? '—' : `${fmt(metrics.onTimeRate)}%`} />
-        <Metric label="O'rtacha sifat bahosi" value={metrics.avgQuality === null ? '—' : `${fmt(metrics.avgQuality)} ⭐`} />
+        <Metric label="O'rtacha sifat bahosi" value={<StarValue value={metrics.avgQuality === null ? null : fmt(metrics.avgQuality)} />} />
         <Metric label="Bajarilgan vazifalar" value={metrics.done} />
         <Metric label="Qaytarilganlar" value={metrics.returns} tone={metrics.returns ? 'orange' : ''} />
       </div>

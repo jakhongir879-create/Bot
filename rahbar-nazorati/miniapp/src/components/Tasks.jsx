@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { Plus } from 'lucide-react';
 import { api } from '../api.js';
 import { TaskCard, Spinner, Empty } from './ui.jsx';
 import { haptic } from '../telegram.js';
@@ -76,7 +77,7 @@ export default function Tasks({ me, filter, onFilter, onOpenTask, onNewTask, ref
       ))}
       {canAssign && (
         <button className="fab" onClick={onNewTask}>
-          ➕ Yangi vazifa
+          <Plus size={18} strokeWidth={2.2} /> Yangi vazifa
         </button>
       )}
     </>

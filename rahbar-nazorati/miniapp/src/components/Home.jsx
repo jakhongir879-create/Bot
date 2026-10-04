@@ -1,4 +1,5 @@
 import React from 'react';
+import { PartyPopper } from 'lucide-react';
 import { ScoreRing, TaskCard, Empty, TrendBadge } from './ui.jsx';
 
 export default function Home({ me, onOpenTask, onNavigate }) {
@@ -8,7 +9,7 @@ export default function Home({ me, onOpenTask, onNavigate }) {
     <>
       <div className="card hero">
         <div className="grow">
-          <div className="small muted">Salom 👋</div>
+          <div className="small muted">Salom</div>
           <div className="hero-name ellipsis">{employee.fullName}</div>
           <div className="small muted ellipsis">{employee.position || employee.roleLabel}</div>
           <div className="row" style={{ marginTop: 8 }}>
@@ -39,7 +40,7 @@ export default function Home({ me, onOpenTask, onNavigate }) {
         upcoming.map((t) => <TaskCard key={t.id} task={t} onClick={() => onOpenTask(t.id)} showAssigner />)
       ) : (
         <div className="card">
-          <Empty icon="🎉">
+          <Empty icon={PartyPopper}>
             {firstName}, sizda hozircha faol vazifa yo'q.
           </Empty>
         </div>

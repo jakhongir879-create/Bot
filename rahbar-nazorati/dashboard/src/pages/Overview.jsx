@@ -1,7 +1,8 @@
 import React from 'react';
+import { Sparkles, Trophy, AlertTriangle } from 'lucide-react';
 import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { api } from '../api.js';
-import { Kpi, PageHead, AiBlock, Loading, useAsync, ChartTooltip, Legend, ScoreBadge, Pill, useThemeVersion } from '../components/ui.jsx';
+import { Kpi, PageHead, AiBlock, Loading, useAsync, ChartTooltip, Legend, ScoreBadge, Pill, useThemeVersion, StatusDot } from '../components/ui.jsx';
 import { money, compactMoney, pct, num, monthLabel, formatDate, chartColors, GOAL_STATUS, scoreTone } from '../utils.js';
 
 export default function Overview() {
@@ -19,7 +20,7 @@ export default function Overview() {
       <div className="grid grid-kpi">
         <Kpi label="Vazifalar bajarilishi" value={pct(tasks.completionRate)} foot={`Muddatida: ${pct(tasks.onTimeRate)} · ${tasks.total} ta vazifa`} tone={tasks.completionRate >= 80 ? 'green' : tasks.completionRate >= 60 ? 'yellow' : 'red'} />
         <Kpi label="Muddati o'tganlar" value={tasks.overdueNow} foot="Hozirgi holat bo'yicha" tone={tasks.overdueNow ? 'red' : 'green'} />
-        <Kpi label="O'rtacha faollik bali" value={num(avgScore, 0)} foot={`🟢 ${statusCounts.faol} · 🟡 ${statusCounts.ortacha} · 🔴 ${statusCounts.sust}`} tone={scoreTone(avgScore)} />
+        <Kpi label="O'rtacha faollik bali" value={num(avgScore, 0)} foot={<span className="row" style={{ gap: 10 }}><span className="row" style={{ gap: 5 }}><StatusDot tone="green" />{statusCounts.faol}</span><span className="row" style={{ gap: 5 }}><StatusDot tone="yellow" />{statusCounts.ortacha}</span><span className="row" style={{ gap: 5 }}><StatusDot tone="red" />{statusCounts.sust}</span></span>} tone={scoreTone(avgScore)} />
         <Kpi
           label="Oxirgi sverka farqi"
           value={lastStockCheck ? compactMoney(lastStockCheck.totalDiff) : '—'}
@@ -30,7 +31,7 @@ export default function Overview() {
         <Kpi label="Sof foyda marjasi" value={cur ? pct(cur.netMargin) : '—'} foot={cur ? `Sof foyda: ${money(cur.netProfit)}` : ''} tone={cur && cur.netMargin < 0 ? 'red' : undefined} />
       </div>
 
-      <div className="section-title">🤖 AI umumiy xulosa</div>
+      <div className="section-title row" style={{ gap: 8 }}><Sparkles size={20} strokeWidth={1.75} color="#5e5ce6" />AI umumiy xulosa</div>
       <AiBlock module="UMUMIY" title="AI umumiy xulosa" />
 
       <div className="grid grid-2" style={{ marginTop: 16 }}>
@@ -74,7 +75,7 @@ export default function Overview() {
 
       <div className="grid grid-2" style={{ marginTop: 16 }}>
         <div className="card">
-          <div className="card-title">🏆 Eng faol xodimlar</div>
+          <div className="card-title row" style={{ gap: 8 }}><Trophy size={17} strokeWidth={1.75} color="#eda100" />Eng faol xodimlar</div>
           {topEmployees.map((e) => (
             <div key={e.id} className="row between" style={{ padding: '9px 0', borderBottom: '1px solid var(--line)' }}>
               <div className="grow">
@@ -86,7 +87,7 @@ export default function Overview() {
           ))}
         </div>
         <div className="card">
-          <div className="card-title">⚠️ E'tibor talab qiladi</div>
+          <div className="card-title row" style={{ gap: 8 }}><AlertTriangle size={17} strokeWidth={1.75} color="#d03b3b" />E'tibor talab qiladi</div>
           {weakEmployees.map((e) => (
             <div key={e.id} className="row between" style={{ padding: '9px 0', borderBottom: '1px solid var(--line)' }}>
               <div className="grow">

@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { Users } from 'lucide-react';
 import { api } from '../api.js';
-import { Spinner, Empty, Sheet, TrendBadge, TaskCard, ScoreRing } from './ui.jsx';
+import { Spinner, Empty, Sheet, TrendBadge, TaskCard, ScoreRing, StarValue } from './ui.jsx';
 import TrendChart from './TrendChart.jsx';
 import { initials, fmt } from '../utils.js';
 import { showAlert } from '../telegram.js';
@@ -42,7 +43,7 @@ function MemberSheet({ memberId, onClose, onOpenTask }) {
           </div>
           <div className="metric-grid">
             <Metric label="Muddatida bajarish" value={data.metrics.onTimeRate === null ? '—' : `${fmt(data.metrics.onTimeRate)}%`} />
-            <Metric label="O'rtacha sifat" value={data.metrics.avgQuality === null ? '—' : `${fmt(data.metrics.avgQuality)} ⭐`} />
+            <Metric label="O'rtacha sifat" value={<StarValue value={data.metrics.avgQuality === null ? null : fmt(data.metrics.avgQuality)} />} />
             <Metric label="Qabul qilish" value={data.metrics.avgAcceptHours === null ? '—' : `${fmt(data.metrics.avgAcceptHours)} soat`} />
             <Metric label="Muddati o'tgan" value={data.metrics.overdue} tone={data.metrics.overdue ? 'red' : ''} />
           </div>
@@ -90,7 +91,7 @@ export default function Team({ onOpenTask, refreshKey }) {
       </div>
       {error && <div className="card tone-red">{error}</div>}
       {!members && !error && <Spinner />}
-      {members && !members.length && <Empty icon="👥">Sizga bo'ysunuvchi xodimlar yo'q</Empty>}
+      {members && !members.length && <Empty icon={Users}>Sizga bo'ysunuvchi xodimlar yo'q</Empty>}
       {members && members.length > 0 && (
         <div className="list">
           {members.map((m) => (

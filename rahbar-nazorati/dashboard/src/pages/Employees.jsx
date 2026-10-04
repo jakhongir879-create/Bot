@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Package, Pencil } from 'lucide-react';
 import { api } from '../api.js';
 import { PageHead, Loading, useAsync, Modal, Empty, Pill, toast } from '../components/ui.jsx';
 import { ROLES } from '../utils.js';
@@ -99,7 +100,7 @@ export default function Employees() {
                 <tr key={e.id} style={{ opacity: e.isActive ? 1 : 0.5 }}>
                   <td>
                     <b>{e.fullName}</b>
-                    <div className="small muted">{e.position}{e.isStockResponsible ? ' · 📦 sklad mas\'uli' : ''}</div>
+                    <div className="small muted">{e.position}{e.isStockResponsible && <span className="row" style={{ gap: 4, display: 'inline-flex' }}> · <Package size={13} strokeWidth={1.75} /> sklad mas'uli</span>}</div>
                   </td>
                   <td style={{ whiteSpace: 'nowrap' }}>{e.phone}</td>
                   <td><Pill tone={e.role === 'DIRECTOR' ? 'blue' : e.role === 'TOP' ? 'orange' : 'muted'}>{e.roleLabel}</Pill></td>
@@ -108,7 +109,7 @@ export default function Employees() {
                   <td>{e.telegramId ? <Pill tone="green">✓ Ulangan</Pill> : <Pill tone="muted">Kutilmoqda</Pill>}</td>
                   <td>{e.isActive ? <Pill tone="green">Faol</Pill> : <Pill tone="red">Faolsiz</Pill>}</td>
                   <td style={{ whiteSpace: 'nowrap' }}>
-                    <button className="icon-btn" onClick={() => setEditing(e)} title="Tahrirlash">✏️</button>
+                    <button className="icon-btn" onClick={() => setEditing(e)} title="Tahrirlash"><Pencil size={16} strokeWidth={1.75} /></button>
                     {(e.role !== 'DIRECTOR' || !e.isActive) && (
                       <button className="btn ghost sm" onClick={() => toggle(e)}>{e.isActive ? 'Faolsizlantirish' : 'Faollashtirish'}</button>
                     )}

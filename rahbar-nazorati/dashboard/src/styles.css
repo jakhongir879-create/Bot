@@ -1040,3 +1040,58 @@ body::after {
     background: var(--solid);
   }
 }
+
+/* ---------- Ikonkalar ---------- */
+.lucide {
+  flex-shrink: 0;
+}
+
+.nav-item .ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-2);
+}
+
+.nav-item.active .ico {
+  color: var(--accent);
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ai-head {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+}
+
+.star-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-dot.green {
+  background: #0ca30c;
+}
+.status-dot.yellow {
+  background: #fab219;
+}
+.status-dot.red {
+  background: #d03b3b;
+}
+
+.spin {
+  animation: spin 0.9s linear infinite;
+}

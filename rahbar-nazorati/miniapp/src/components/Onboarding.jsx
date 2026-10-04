@@ -1,10 +1,11 @@
 import React, { useRef, useState } from 'react';
+import { ListChecks, BellRing, Award } from 'lucide-react';
 import { haptic } from '../telegram.js';
 
 const SLIDES = [
-  { icon: '📋', title: 'Barcha vazifalaringiz bir joyda.', text: "Kim, qachongacha, nima qilishi kerak — hammasi aniq va ko'z oldingizda." },
-  { icon: '⏰', title: "Deadline'larni o'tkazib yubormaysiz — tizim eslatib turadi.", text: "Muddatdan 24 soat va 2 soat oldin eslatma keladi." },
-  { icon: '🏆', title: 'Natijalaringiz adolatli baholanadi.', text: "Tezlik, muddatga rioya va sifat avtomatik o'lchanadi." },
+  { Icon: ListChecks, title: 'Barcha vazifalaringiz bir joyda.', text: "Kim, qachongacha, nima qilishi kerak — hammasi aniq va ko'z oldingizda." },
+  { Icon: BellRing, title: "Deadline'larni o'tkazib yubormaysiz — tizim eslatib turadi.", text: "Muddatdan 24 soat va 2 soat oldin eslatma keladi." },
+  { Icon: Award, title: 'Natijalaringiz adolatli baholanadi.', text: "Tezlik, muddatga rioya va sifat avtomatik o'lchanadi." },
 ];
 
 export default function Onboarding({ onDone }) {
@@ -39,7 +40,9 @@ export default function Onboarding({ onDone }) {
       <div className="onb-slides" ref={ref} onScroll={onScroll}>
         {SLIDES.map((s) => (
           <div className="onb-slide" key={s.title}>
-            <div className="onb-icon">{s.icon}</div>
+            <div className="onb-icon">
+              <s.Icon size={56} strokeWidth={1.5} color="var(--accent)" />
+            </div>
             <h1 className="onb-title">{s.title}</h1>
             <p className="onb-text">{s.text}</p>
           </div>

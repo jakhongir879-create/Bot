@@ -1028,3 +1028,44 @@ body::after {
   backdrop-filter: blur(30px) saturate(180%);
   -webkit-backdrop-filter: blur(30px) saturate(180%);
 }
+
+/* ---------- Ikonkalar ---------- */
+.lucide {
+  flex-shrink: 0;
+}
+
+.nav button .icon {
+  filter: none;
+  opacity: 1;
+  display: flex;
+  height: 26px;
+  align-items: center;
+}
+
+.nav button.active .icon {
+  filter: none;
+}
+
+.empty .big {
+  display: flex;
+  justify-content: center;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.star-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stars button {
+  filter: none;
+  opacity: 1;
+}
+
+.fab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}

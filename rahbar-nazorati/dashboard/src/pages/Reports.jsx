@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { MessageCircle, Trash2 } from 'lucide-react';
 import { api } from '../api.js';
 import { PageHead, Loading, useAsync, Empty, Pill, AiText, toast } from '../components/ui.jsx';
 import { MODULES, formatDateTime } from '../utils.js';
@@ -36,7 +37,7 @@ export default function Reports() {
     <>
       <PageHead title="AI hisobotlar" sub="Barcha saqlangan AI tahlillar arxivi" />
       <form className="ai-card" onSubmit={ask} style={{ marginBottom: 20 }}>
-        <div className="card-title" style={{ fontSize: 17 }}>💬 AI'ga savol bering</div>
+        <div className="card-title row" style={{ fontSize: 17, gap: 8 }}><MessageCircle size={18} strokeWidth={1.75} color="#5e5ce6" />AI'ga savol bering</div>
         <div className="small muted" style={{ marginBottom: 12 }}>Masalan: «Bu oy kim eng sust ishladi?» yoki «Marketing xarajati strategiyaga mosmi?»</div>
         <div className="row">
           <input className="input grow" value={question} onChange={(e) => setQuestion(e.target.value)} placeholder="Savolingizni yozing..." maxLength={1000} />
@@ -71,7 +72,7 @@ export default function Reports() {
                     </div>
                     <div className="row">
                       <span className="small muted">{formatDateTime(r.createdAt)}</span>
-                      <button className="icon-btn" onClick={(e) => { e.stopPropagation(); remove(r.id); }} title="O'chirish">🗑</button>
+                      <button className="icon-btn" onClick={(e) => { e.stopPropagation(); remove(r.id); }} title="O'chirish"><Trash2 size={16} strokeWidth={1.75} /></button>
                       <span className="muted">{open === r.id ? '▲' : '▼'}</span>
                     </div>
                   </div>
@@ -83,7 +84,7 @@ export default function Reports() {
                 </div>
               ))
             ) : (
-              <div className="card"><Empty>Hali AI hisobot yo'q. Istalgan bo'limdagi «🤖 AI tahlil» tugmasini bosing.</Empty></div>
+              <div className="card"><Empty>Hali AI hisobot yo'q. Istalgan bo'limdagi «AI tahlil» tugmasini bosing.</Empty></div>
             )}
           </>
         )

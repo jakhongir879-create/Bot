@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { Lock } from 'lucide-react';
 import { api } from './api.js';
 import { initTelegram, tg, haptic } from './telegram.js';
 import { BottomNav, Spinner, ToastHost } from './components/ui.jsx';
@@ -71,7 +72,7 @@ export default function App() {
   if (error) {
     return (
       <div className="center-screen">
-        <div style={{ fontSize: 56 }}>🔒</div>
+        <Lock size={52} strokeWidth={1.5} color="var(--muted)" />
         <div className="bold" style={{ fontSize: 20 }}>
           Kirish imkoni yo'q
         </div>

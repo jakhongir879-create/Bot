@@ -100,11 +100,12 @@ export default function NewTaskSheet({ open, onClose, onCreated }) {
         <span>Muhimlik</span>
         <div className="option-grid">
           {[
-            ['PAST', '🟢 Past'],
-            ['ORTA', "🟡 O'rta"],
-            ['YUQORI', '🔴 Yuqori'],
-          ].map(([key, label]) => (
-            <button key={key} className={`option ${form.priority === key ? 'active' : ''}`} onClick={() => setForm((f) => ({ ...f, priority: key }))}>
+            ['PAST', 'Past', 'green'],
+            ['ORTA', "O'rta", 'yellow'],
+            ['YUQORI', 'Yuqori', 'red'],
+          ].map(([key, label, tone]) => (
+            <button key={key} className={`option row ${form.priority === key ? 'active' : ''}`} style={{ justifyContent: 'center', gap: 6 }} onClick={() => setForm((f) => ({ ...f, priority: key }))}>
+              <span className={`dot ${tone}`} />
               {label}
             </button>
           ))}

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { RotateCcw, PenLine, Check, CheckCheck, Star, Paperclip, XCircle, Image, FileText } from 'lucide-react';
 import { api } from '../api.js';
 import { Sheet, Spinner, StatusPill, PriorityPill, toast } from './ui.jsx';
 import { haptic, showAlert } from '../telegram.js';
@@ -125,32 +126,32 @@ export default function TaskSheet({ taskId, onClose, onChanged }) {
           Bekor qilish
         </button>
         <button className="btn danger" disabled={!comment.trim() || busy} onClick={() => run({ action: 'return', comment: comment.trim() }, 'Qayta ishlashga qaytarildi')}>
-          🔁 Qaytarish
+          <RotateCcw size={18} /> Qaytarish
         </button>
       </div>
     );
   } else if (needsOverdueReason) {
     footer = (
       <button className="btn danger" onClick={() => setMode('overdue')}>
-        📝 Kechikish sababini yozish
+        <PenLine size={18} /> Kechikish sababini yozish
       </button>
     );
   } else if (canWork && ['YANGI', 'QAYTARILDI'].includes(task.status)) {
     footer = (
       <button className="btn" disabled={busy} onClick={() => run({ action: 'accept' }, 'Vazifa qabul qilindi')}>
-        ✅ Qabul qildim
+        <Check size={19} strokeWidth={2.4} /> Qabul qildim
       </button>
     );
   } else if (canWork) {
     footer = (
       <button className="btn success" disabled={busy} onClick={() => run({ action: 'complete' }, 'Ajoyib! Vazifa bajarildi')}>
-        ✔️ Bajarildi
+        <CheckCheck size={19} strokeWidth={2.4} /> Bajarildi
       </button>
     );
   } else if (canRate) {
     footer = (
       <button className="btn" disabled={!stars || busy} onClick={() => run({ action: 'rate', score: stars }, 'Baho qo\'yildi')}>
-        ⭐ Baholash{stars ? ` (${stars})` : ''}
+        <Star size={18} /> Baholash{stars ? ` (${stars})` : ''}
       </button>
     );
   }
@@ -184,7 +185,7 @@ export default function TaskSheet({ taskId, onClose, onChanged }) {
           {task.qualityScore && (
             <>
               <dt>Sifat bahosi</dt>
-              <dd>{'⭐'.repeat(task.qualityScore)}</dd>
+              <dd className="star-value" style={{ justifyContent: 'flex-end' }}>{Array.from({ length: task.qualityScore }, (_, i) => <Star key={i} size={15} strokeWidth={0} fill="#f5a623" />)}</dd>
             </>
           )}
           {task.returnCount > 0 && (
@@ -239,15 +240,15 @@ export default function TaskSheet({ taskId, onClose, onChanged }) {
             </div>
             <input type="range" min="5" max="95" step="5" value={progress} onChange={(e) => setProgress(Number(e.target.value))} />
             <button className="btn secondary" style={{ marginTop: 8 }} disabled={busy} onClick={() => run({ action: 'progress', progress }, `Jarayonda: ${progress}%`)}>
-              ⏳ Jarayonda — {progress}%
+              Jarayonda — {progress}%
             </button>
           </div>
           <div className="btn-row" style={{ marginTop: 10 }}>
             <button className="btn ghost" disabled={busy} onClick={() => fileRef.current?.click()}>
-              📎 Fayl yuklash
+              <Paperclip size={18} /> Fayl yuklash
             </button>
             <button className="btn danger" disabled={busy} onClick={() => setMode('fail')}>
-              ❌ Bajara olmayman
+              <XCircle size={18} /> Bajara olmayman
             </button>
           </div>
           <input ref={fileRef} type="file" hidden onChange={onFile} />
@@ -269,12 +270,12 @@ export default function TaskSheet({ taskId, onClose, onChanged }) {
                   }}
                   aria-label={`${n} yulduz`}
                 >
-                  ⭐
+                  <Star size={36} strokeWidth={1.4} fill={n <= stars ? '#f5a623' : 'none'} color={n <= stars ? '#f5a623' : 'var(--muted)'} />
                 </button>
               ))}
             </div>
             <button className="btn danger" style={{ marginTop: 12 }} onClick={() => setMode('return')}>
-              🔁 Qayta ishlashga qaytarish
+              <RotateCcw size={18} /> Qayta ishlashga qaytarish
             </button>
           </div>
         </>
@@ -286,7 +287,7 @@ export default function TaskSheet({ taskId, onClose, onChanged }) {
           <div className="list">
             {files.map((f) => (
               <button key={f.id} className="list-item" onClick={() => sendFile(f.id)}>
-                <span style={{ fontSize: 22 }}>{f.fileType === 'photo' ? '🖼' : '📄'}</span>
+                {f.fileType === 'photo' ? <Image size={22} strokeWidth={1.6} color="var(--accent)" /> : <FileText size={22} strokeWidth={1.6} color="var(--accent)" />}
                 <div className="grow">
                   <div className="ellipsis">{f.fileName}</div>
                   <div className="small muted">

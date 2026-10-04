@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { Pencil, Trash2, Sparkles } from 'lucide-react';
 import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine } from 'recharts';
 import { api } from '../api.js';
 import { PageHead, AiBlock, Loading, useAsync, Modal, Empty, toast, Pill, Kpi, ChartTooltip, Legend, AiText, useThemeVersion } from '../components/ui.jsx';
@@ -354,8 +355,8 @@ export default function Finance() {
                   <b className={`tone-${s.tone}`}>{s.label}</b>
                 </span>
                 <span>
-                  <button className="icon-btn" onClick={() => setGoal(g)} title="Tahrirlash">✏️</button>
-                  <button className="icon-btn" onClick={() => removeGoal(g.id)} title="O'chirish">🗑</button>
+                  <button className="icon-btn" onClick={() => setGoal(g)} title="Tahrirlash"><Pencil size={16} strokeWidth={1.75} /></button>
+                  <button className="icon-btn" onClick={() => removeGoal(g.id)} title="O'chirish"><Trash2 size={16} strokeWidth={1.75} /></button>
                 </span>
               </div>
               <div className="bold">{g.name}</div>
@@ -418,10 +419,10 @@ export default function Finance() {
                     </td>
                     <td style={{ whiteSpace: 'nowrap' }}>
                       <button className="btn ai sm" onClick={() => evaluate(d.id)} disabled={evaluating === d.id}>
-                        {evaluating === d.id ? '...' : '🤖 Baholash'}
+                        {evaluating === d.id ? '...' : <><Sparkles size={14} /> Baholash</>}
                       </button>
-                      <button className="icon-btn" onClick={() => setDecision(d)} title="Tahrirlash">✏️</button>
-                      <button className="icon-btn" onClick={() => removeDecision(d.id)} title="O'chirish">🗑</button>
+                      <button className="icon-btn" onClick={() => setDecision(d)} title="Tahrirlash"><Pencil size={16} strokeWidth={1.75} /></button>
+                      <button className="icon-btn" onClick={() => removeDecision(d.id)} title="O'chirish"><Trash2 size={16} strokeWidth={1.75} /></button>
                     </td>
                   </tr>
                 );
@@ -433,7 +434,7 @@ export default function Finance() {
       </div>
 
       <div style={{ marginTop: 16 }}>
-        <AiBlock module="MOLIYA" title="🤖 AI tahlil: moliya va strategiya" compact />
+        <AiBlock module="MOLIYA" title="AI tahlil: moliya va strategiya" compact />
       </div>
 
       <EntryModal open={entryOpen} onClose={() => setEntryOpen(false)} entries={data.entries} categories={categories} onSaved={reload} />

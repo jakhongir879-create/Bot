@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine } from 'recharts';
 import { api } from '../api.js';
-import { PageHead, AiBlock, Loading, useAsync, Pill, Modal, ChartTooltip, Legend, ScoreBadge, Empty, useThemeVersion } from '../components/ui.jsx';
+import { PageHead, AiBlock, Loading, useAsync, Pill, Modal, ChartTooltip, Legend, ScoreBadge, Empty, useThemeVersion, StarValue } from '../components/ui.jsx';
 import { ROLES, STATUS, num, pct, formatDate, chartColors } from '../utils.js';
 
 function TrendIcon({ trend }) {
@@ -35,7 +35,7 @@ function EmployeeModal({ id, onClose }) {
             </div>
             <div className="card" style={{ background: 'var(--card-2)' }}>
               <div className="kpi-label">O'rtacha sifat</div>
-              <div className="kpi-value">{num(data.metrics.avgQuality)} ⭐</div>
+              <div className="kpi-value"><StarValue value={data.metrics.avgQuality === null ? null : num(data.metrics.avgQuality)} /></div>
             </div>
             <div className="card" style={{ background: 'var(--card-2)' }}>
               <div className="kpi-label">Qabul qilish tezligi</div>
@@ -67,7 +67,7 @@ function EmployeeModal({ id, onClose }) {
                     <td>{t.title}</td>
                     <td>{formatDate(t.deadline)}</td>
                     <td><Pill tone={STATUS[t.status].tone}>{STATUS[t.status].label}</Pill></td>
-                    <td className="num">{t.qualityScore ? `${t.qualityScore} ⭐` : '—'}</td>
+                    <td className="num"><StarValue value={t.qualityScore} /></td>
                   </tr>
                 ))}
               </tbody>
@@ -136,7 +136,7 @@ export default function Activity() {
                         <td className="num">{pct(r.onTimeRate, 0)}</td>
                         <td className={`num ${r.avgDelayDays > 1 ? 'neg' : ''}`}>{r.avgDelayDays ? `${num(r.avgDelayDays)} kun` : '—'}</td>
                         <td className="num">{r.avgAcceptHours === null ? '—' : `${num(r.avgAcceptHours)} soat`}</td>
-                        <td className="num">{r.avgQuality === null ? '—' : `${num(r.avgQuality)} ⭐`}</td>
+                        <td className="num"><StarValue value={r.avgQuality === null ? null : num(r.avgQuality)} /></td>
                         <td className="num">{r.returns}</td>
                         <td className="num">
                           {r.total}
@@ -163,7 +163,7 @@ export default function Activity() {
                     <tr><td>Xodimlar soni</td>{data.comparison.map((g) => <td key={g.role} className="num">{g.count}</td>)}</tr>
                     <tr><td>O'rtacha ball</td>{data.comparison.map((g) => <td key={g.role} className="num bold">{num(g.avgScore)}</td>)}</tr>
                     <tr><td>Muddatida bajarish</td>{data.comparison.map((g) => <td key={g.role} className="num">{pct(g.avgOnTime)}</td>)}</tr>
-                    <tr><td>O'rtacha sifat</td>{data.comparison.map((g) => <td key={g.role} className="num">{num(g.avgQuality)} ⭐</td>)}</tr>
+                    <tr><td>O'rtacha sifat</td>{data.comparison.map((g) => <td key={g.role} className="num"><StarValue value={g.avgQuality === null ? null : num(g.avgQuality)} /></td>)}</tr>
                     <tr><td>Qabul qilish (soat)</td>{data.comparison.map((g) => <td key={g.role} className="num">{num(g.avgAcceptHours)}</td>)}</tr>
                     <tr><td>Muddati o'tgan</td>{data.comparison.map((g) => <td key={g.role} className="num">{g.overdue}</td>)}</tr>
                     <tr><td>Qaytarilganlar</td>{data.comparison.map((g) => <td key={g.role} className="num">{g.returns}</td>)}</tr>
@@ -192,7 +192,7 @@ export default function Activity() {
             </div>
 
             <div style={{ marginTop: 16 }}>
-              <AiBlock module="FAOLLIK" title="🤖 AI tahlil: xodimlar faolligi" compact />
+              <AiBlock module="FAOLLIK" title="AI tahlil: xodimlar faolligi" compact />
             </div>
           </>
         )

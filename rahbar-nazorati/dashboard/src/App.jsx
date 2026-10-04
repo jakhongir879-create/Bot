@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Home, ListChecks, TrendingUp, Package, Wallet, Sparkles, Users, Settings as SettingsIcon, Menu, LogOut } from 'lucide-react';
 import { getToken, setToken, setUnauthorizedHandler } from './api.js';
 import { ToastHost } from './components/ui.jsx';
 import Login from './pages/Login.jsx';
@@ -12,14 +13,14 @@ import Employees from './pages/Employees.jsx';
 import Settings from './pages/Settings.jsx';
 
 const PAGES = [
-  { key: 'overview', label: 'Bosh sahifa', icon: '🏠', component: Overview },
-  { key: 'tasks', label: 'Vazifalar', icon: '📋', component: Tasks },
-  { key: 'activity', label: 'Xodimlar faolligi', icon: '📈', component: Activity },
-  { key: 'stock', label: 'Sklad sverka', icon: '📦', component: Stock },
-  { key: 'finance', label: 'Moliya va strategiya', icon: '💰', component: Finance },
-  { key: 'reports', label: 'AI hisobotlar', icon: '🤖', component: Reports },
-  { key: 'employees', label: 'Xodimlar', icon: '👥', component: Employees },
-  { key: 'settings', label: 'Sozlamalar', icon: '⚙️', component: Settings },
+  { key: 'overview', label: 'Bosh sahifa', Icon: Home, component: Overview },
+  { key: 'tasks', label: 'Vazifalar', Icon: ListChecks, component: Tasks },
+  { key: 'activity', label: 'Xodimlar faolligi', Icon: TrendingUp, component: Activity },
+  { key: 'stock', label: 'Sklad sverka', Icon: Package, component: Stock },
+  { key: 'finance', label: 'Moliya va strategiya', Icon: Wallet, component: Finance },
+  { key: 'reports', label: 'AI hisobotlar', Icon: Sparkles, component: Reports },
+  { key: 'employees', label: 'Xodimlar', Icon: Users, component: Employees },
+  { key: 'settings', label: 'Sozlamalar', Icon: SettingsIcon, component: Settings },
 ];
 
 function currentPage() {
@@ -61,8 +62,8 @@ export default function App() {
   return (
     <div className="layout">
       <header className="topbar">
-        <button className="icon-btn" style={{ fontSize: 20 }} onClick={() => setMenuOpen(true)} aria-label="Menyu">
-          ☰
+        <button className="icon-btn" onClick={() => setMenuOpen(true)} aria-label="Menyu">
+          <Menu size={22} strokeWidth={1.75} />
         </button>
         <b>{PAGES.find((p) => p.key === page).label}</b>
       </header>
@@ -77,13 +78,17 @@ export default function App() {
         </div>
         {PAGES.map((p) => (
           <a key={p.key} href={`#/${p.key}`} className={`nav-item ${page === p.key ? 'active' : ''}`}>
-            <span className="ico">{p.icon}</span>
+            <span className="ico">
+              <p.Icon size={19} strokeWidth={1.75} />
+            </span>
             {p.label}
           </a>
         ))}
         <div className="sidebar-footer">
           <button className="nav-item" onClick={logout}>
-            <span className="ico">↩︎</span>
+            <span className="ico">
+              <LogOut size={19} strokeWidth={1.75} />
+            </span>
             Chiqish
           </button>
         </div>
