@@ -9,13 +9,14 @@
   },
   "scripts": {
     "setup": "npm install && npm install --prefix miniapp && npm install --prefix dashboard",
-    "build": "npm run build --prefix miniapp && npm run build --prefix dashboard",
+    "build": "npm install --include=dev --prefix miniapp && npm run build --prefix miniapp && npm install --include=dev --prefix dashboard && npm run build --prefix dashboard",
     "db:migrate": "prisma migrate deploy",
     "db:seed": "prisma db seed",
     "db:reset": "prisma migrate reset --force",
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "start:prod": "prisma migrate deploy && node src/index.js"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
@@ -29,9 +30,7 @@
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.0.2",
     "node-cron": "^4.2.1",
+    "prisma": "^6.19.3",
     "xlsx": "^0.18.5"
-  },
-  "devDependencies": {
-    "prisma": "^6.19.3"
   }
 }

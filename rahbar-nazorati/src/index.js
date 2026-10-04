@@ -3,7 +3,7 @@ const fs = require('fs');
 const express = require('express');
 const multer = require('multer');
 const { config, validateConfig } = require('./config/default');
-const { connectDatabase, disconnectDatabase } = require('./database/connection');
+const { prisma, connectDatabase, disconnectDatabase } = require('./database/connection');
 const { bot } = require('./core/bot');
 const { registerBotRoutes } = require('./routes/bot.routes');
 const appRoutes = require('./routes/app.routes');
@@ -63,6 +63,21 @@ function createServer() {
   return app;
 }
 
+/** Bo'sh bazada ham direktor tizimga kira olishi uchun boshlang'ich yozuvlar */
+async function ensureBaseRecords() {
+  if (!(await prisma.company.findFirst())) await prisma.company.create({ data: { name: 'Kompaniya' } });
+  const director = await prisma.employee.findFirst({ where: { role: 'DIRECTOR' } });
+  if (!director) {
+    const taken = await prisma.employee.findFirst({ where: { telegramId: config.directorTelegramId } });
+    if (!taken) {
+      await prisma.employee.create({
+        data: { fullName: 'Direktor', phone: `+000${config.directorTelegramId}`, position: 'Direktor', role: 'DIRECTOR', telegramId: config.directorTelegramId, isStockResponsible: true },
+      });
+      console.log("👤 Direktor yozuvi yaratildi (ismi va telefonini Dashboard → Xodimlar bo'limida o'zgartiring)");
+    }
+  }
+}
+
 async function setupBotMenu() {
   await bot.api.setMyCommands([{ command: 'start', description: 'Bosh menyu' }]);
   if (config.webappUrl.startsWith('https://')) {
@@ -82,6 +97,7 @@ async function main() {
 
   await connectDatabase();
   console.log("✅ Ma'lumotlar bazasiga ulandi");
+  await ensureBaseRecords();
 
   const app = createServer();
   const server = app.listen(config.port, () => {

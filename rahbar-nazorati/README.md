@@ -97,6 +97,16 @@ npm start
 5. Istalgan bo'limda **🤖 AI tahlil** tugmasini bosing (API kalit kerak).
 6. Botdagi **📱 Ilovani ochish** tugmasini bosing. Mini App ochilishi kerak.
 
+## ☁️ Serverga joylash (Railway, 24/7)
+
+1. https://railway.com → GitHub bilan kiring → **New Project** → **Deploy from GitHub repo** → `Bot` repozitoriysi.
+2. Servis → **Settings** → **Source** → **Branch**: `claude/intelligent-euler-95kz1s`.
+3. **Variables** → **Raw Editor** → `.env` dagi qatorlarni joylashtiring va qo'shing: `DASHBOARD_PUBLIC="true"`.
+4. **Settings** → **Networking** → **Generate Domain** → manzilni `WEBAPP_URL` ga yozing.
+5. Kompyuterdagi botni to'xtating (bitta bot faqat bir joyda ishlashi mumkin).
+
+Dashboard: `https://SIZNING-MANZIL.up.railway.app/dashboard`. Serverda Dashboard internetga ochiq bo'ladi — kuchli parol qo'ying.
+
 ## Xodimlarni ulash
 
 Dashboard → **Xodimlar** bo'limida xodim qo'shing (telefon raqami bilan). Xodim botga `/start` yozib, **📞 Kontaktni yuborish** tugmasini bosadi va tizimga ulanadi.
