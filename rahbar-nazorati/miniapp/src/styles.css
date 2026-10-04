@@ -1069,3 +1069,53 @@ body::after {
   align-items: center;
   gap: 6px;
 }
+
+/* ---------- Ko'proq shaffoflik ---------- */
+:root {
+  --card: rgba(255, 255, 255, 0.34);
+  --card-2: rgba(255, 255, 255, 0.3);
+  --glass-border: rgba(255, 255, 255, 0.55);
+  --solid: rgba(255, 255, 255, 0.58);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --card: rgba(20, 24, 34, 0.36);
+    --card-2: rgba(255, 255, 255, 0.07);
+    --glass-border: rgba(255, 255, 255, 0.14);
+    --solid: rgba(18, 22, 32, 0.62);
+  }
+}
+
+:root[data-theme='dark'] {
+  --card: rgba(20, 24, 34, 0.36);
+  --card-2: rgba(255, 255, 255, 0.07);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --solid: rgba(18, 22, 32, 0.62);
+}
+
+.sheet .card,
+.sheet .list,
+.sheet .stat,
+.sheet .task-card {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+:root[data-theme='dark'] .sheet .card,
+:root[data-theme='dark'] .sheet .list,
+:root[data-theme='dark'] .sheet .stat,
+:root[data-theme='dark'] .sheet .task-card {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.sheet,
+.sheet-footer {
+  background: rgba(240, 244, 250, 0.96);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+}
+
+:root[data-theme='dark'] .sheet,
+:root[data-theme='dark'] .sheet-footer {
+  background: rgba(18, 22, 32, 0.96);
+}

@@ -1095,3 +1095,39 @@ body::after {
 .spin {
   animation: spin 0.9s linear infinite;
 }
+
+/* ---------- Ko'proq shaffoflik ---------- */
+:root {
+  --card: rgba(255, 255, 255, 0.34);
+  --card-2: rgba(255, 255, 255, 0.3);
+  --glass-border: rgba(255, 255, 255, 0.55);
+  --solid: rgba(255, 255, 255, 0.58);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --card: rgba(20, 24, 34, 0.36);
+    --card-2: rgba(255, 255, 255, 0.07);
+    --glass-border: rgba(255, 255, 255, 0.14);
+    --solid: rgba(18, 22, 32, 0.62);
+  }
+}
+
+:root[data-theme='dark'] {
+  --card: rgba(20, 24, 34, 0.36);
+  --card-2: rgba(255, 255, 255, 0.07);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --solid: rgba(18, 22, 32, 0.62);
+}
+
+.modal {
+  background: rgba(246, 248, 252, 0.95);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .modal {
+    background: rgba(18, 22, 32, 0.95);
+  }
+}
