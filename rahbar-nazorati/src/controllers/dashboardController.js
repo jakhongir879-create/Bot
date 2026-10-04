@@ -348,6 +348,9 @@ async function updateEmployee(req, res) {
 async function setEmployeeActive(req, res) {
   const id = Number(req.params.id);
   const isActive = Boolean(req.body?.isActive);
+  const target = await prisma.employee.findUnique({ where: { id } });
+  if (!target) return res.status(404).json({ error: 'Xodim topilmadi' });
+  if (!isActive && target.role === 'DIRECTOR') throw new ValidationError("Direktorni faolsizlantirib bo'lmaydi");
   const data = { isActive };
   if (!isActive) data.telegramId = null;
   res.json({ employee: await prisma.employee.update({ where: { id }, data }) });

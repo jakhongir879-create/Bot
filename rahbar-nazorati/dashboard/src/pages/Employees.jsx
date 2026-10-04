@@ -109,7 +109,9 @@ export default function Employees() {
                   <td>{e.isActive ? <Pill tone="green">Faol</Pill> : <Pill tone="red">Faolsiz</Pill>}</td>
                   <td style={{ whiteSpace: 'nowrap' }}>
                     <button className="icon-btn" onClick={() => setEditing(e)} title="Tahrirlash">✏️</button>
-                    <button className="btn ghost sm" onClick={() => toggle(e)}>{e.isActive ? 'Faolsizlantirish' : 'Faollashtirish'}</button>
+                    {(e.role !== 'DIRECTOR' || !e.isActive) && (
+                      <button className="btn ghost sm" onClick={() => toggle(e)}>{e.isActive ? 'Faolsizlantirish' : 'Faollashtirish'}</button>
+                    )}
                   </td>
                 </tr>
               ))}

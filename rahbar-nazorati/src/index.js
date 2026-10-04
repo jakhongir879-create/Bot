@@ -66,7 +66,14 @@ function createServer() {
 /** Bo'sh bazada ham direktor tizimga kira olishi uchun boshlang'ich yozuvlar */
 async function ensureBaseRecords() {
   if (!(await prisma.company.findFirst())) await prisma.company.create({ data: { name: 'Kompaniya' } });
-  const director = await prisma.employee.findFirst({ where: { role: 'DIRECTOR' } });
+  const activeDirector = await prisma.employee.findFirst({ where: { role: 'DIRECTOR', isActive: true } });
+  const inactiveDirector = activeDirector ? null : await prisma.employee.findFirst({ where: { role: 'DIRECTOR' }, orderBy: { id: 'asc' } });
+  if (inactiveDirector) {
+    await prisma.employee.updateMany({ where: { telegramId: config.directorTelegramId, NOT: { id: inactiveDirector.id } }, data: { telegramId: null } });
+    await prisma.employee.update({ where: { id: inactiveDirector.id }, data: { isActive: true, telegramId: config.directorTelegramId } });
+    console.log('👤 Direktor yozuvi qayta faollashtirildi');
+  }
+  const director = activeDirector || inactiveDirector;
   if (!director) {
     const taken = await prisma.employee.findFirst({ where: { telegramId: config.directorTelegramId } });
     if (!taken) {
