@@ -282,7 +282,11 @@ export function useThemeVersion() {
     const mq = window.matchMedia?.('(prefers-color-scheme: dark)');
     const fn = () => setV((x) => x + 1);
     mq?.addEventListener?.('change', fn);
-    return () => mq?.removeEventListener?.('change', fn);
+    window.addEventListener('themechange', fn);
+    return () => {
+      mq?.removeEventListener?.('change', fn);
+      window.removeEventListener('themechange', fn);
+    };
   }, []);
   return v;
 }

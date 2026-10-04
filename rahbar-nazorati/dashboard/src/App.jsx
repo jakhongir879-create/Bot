@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Home, ListChecks, TrendingUp, Package, Wallet, Sparkles, Users, Settings as SettingsIcon, Menu, LogOut } from 'lucide-react';
+import { Home, ListChecks, TrendingUp, Package, Wallet, Sparkles, Users, Settings as SettingsIcon, Menu, LogOut, Sun, Moon, Monitor } from 'lucide-react';
+import { getSavedTheme, saveTheme } from './theme.js';
 import { getToken, setToken, setUnauthorizedHandler } from './api.js';
 import { ToastHost } from './components/ui.jsx';
 import Login from './pages/Login.jsx';
@@ -32,6 +33,11 @@ export default function App() {
   const [authed, setAuthed] = useState(Boolean(getToken()));
   const [page, setPage] = useState(currentPage());
   const [menuOpen, setMenuOpen] = useState(false);
+  const [theme, setTheme] = useState(getSavedTheme());
+  const changeTheme = (mode) => {
+    setTheme(mode);
+    saveTheme(mode);
+  };
 
   useEffect(() => {
     setUnauthorizedHandler(() => setAuthed(false));
@@ -85,6 +91,18 @@ export default function App() {
           </a>
         ))}
         <div className="sidebar-footer">
+          <div className="theme-switch" role="group" aria-label="Mavzu">
+            {[
+              ['light', Sun, 'Kunduzgi'],
+              ['dark', Moon, 'Tungi'],
+              ['auto', Monitor, 'Avto'],
+            ].map(([mode, Icon, label]) => (
+              <button key={mode} className={theme === mode ? 'active' : ''} onClick={() => changeTheme(mode)} title={label}>
+                <Icon size={14} strokeWidth={1.9} />
+                {label}
+              </button>
+            ))}
+          </div>
           <button className="nav-item" onClick={logout}>
             <span className="ico">
               <LogOut size={19} strokeWidth={1.75} />

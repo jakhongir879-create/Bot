@@ -1131,3 +1131,89 @@ body::after {
     background: rgba(18, 22, 32, 0.95);
   }
 }
+
+/* ---------- Qo'lda tanlangan tungi rejim ---------- */
+  :root[data-theme='dark'] {
+    color-scheme: dark;
+    --bg: #000000;
+    --card: #1c1c1e;
+    --card-2: #2c2c2e;
+    --hover: #2c2c2e;
+    --text: #f5f5f7;
+    --text-2: #c3c2b7;
+    --muted: #8e8e93;
+    --line: rgba(255, 255, 255, 0.09);
+    --line-strong: rgba(255, 255, 255, 0.16);
+    --accent: #0a84ff;
+    --accent-soft: rgba(10, 132, 255, 0.18);
+    --green: #30c330;
+    --green-soft: rgba(12, 163, 12, 0.2);
+    --yellow: #fab219;
+    --yellow-soft: rgba(250, 178, 25, 0.16);
+    --red: #ff6b6b;
+    --red-soft: rgba(230, 103, 103, 0.18);
+    --orange: #ff9f6b;
+    --orange-soft: rgba(236, 131, 90, 0.18);
+    --blue: #5aa2f0;
+    --blue-soft: rgba(57, 135, 229, 0.2);
+    --shadow: none;
+  }
+
+  :root[data-theme='dark'] {
+    --bg: #0b1424;
+    --card: rgba(22, 26, 36, 0.58);
+    --card-2: rgba(255, 255, 255, 0.08);
+    --hover: rgba(255, 255, 255, 0.08);
+    --muted: #a3a9b5;
+    --text-2: #d0d4dc;
+    --line: rgba(255, 255, 255, 0.1);
+    --line-strong: rgba(255, 255, 255, 0.18);
+    --glass-border: rgba(255, 255, 255, 0.12);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    --veil: linear-gradient(180deg, rgba(0, 8, 24, 0.55), rgba(0, 4, 16, 0.72));
+    --solid: rgba(24, 28, 38, 0.94);
+  }
+
+  :root[data-theme='dark'] .input {
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  :root[data-theme='dark'] {
+    --card: rgba(20, 24, 34, 0.36);
+    --card-2: rgba(255, 255, 255, 0.07);
+    --glass-border: rgba(255, 255, 255, 0.14);
+    --solid: rgba(18, 22, 32, 0.62);
+  }
+
+  :root[data-theme='dark'] .modal {
+    background: rgba(18, 22, 32, 0.95);
+  }
+
+
+.theme-switch {
+  display: flex;
+  background: var(--card-2);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  padding: 3px;
+  margin: 0 4px 10px;
+}
+
+.theme-switch button {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 6px 4px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-2);
+}
+
+.theme-switch button.active {
+  background: var(--solid);
+  color: var(--text);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
