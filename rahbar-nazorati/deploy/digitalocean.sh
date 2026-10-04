@@ -46,9 +46,12 @@ else
 fi
 
 log "4/7 Server manzili aniqlanmoqda"
-IP=$(curl -s --max-time 3 http://169.254.169.254/metadata/v1/interfaces/public/0/ipv4/address || true)
-[ -n "$IP" ] || IP=$(curl -s --max-time 5 https://api.ipify.org || true)
-[ -n "$IP" ] || fail "Serverning IP manzilini aniqlab bo'lmadi"
+valid_ip() { [[ "$1" =~ ^[0-9]{1,3}(\.[0-9]{1,3}){3}$ ]]; }
+IP="${SERVER_IP:-}"
+valid_ip "$IP" || IP=$(curl -s --max-time 3 http://169.254.169.254/metadata/v1/interfaces/public/0/ipv4/address || true)
+valid_ip "$IP" || IP=$(curl -s --max-time 5 https://api.ipify.org || true)
+valid_ip "$IP" || IP=$(curl -s --max-time 5 https://ifconfig.me || true)
+valid_ip "$IP" || fail "Serverning IP manzilini aniqlab bo'lmadi. Buyruq boshiga SERVER_IP='1.2.3.4' qo'shib qayta urinib ko'ring."
 HOST="$(echo "$IP" | tr . -).sslip.io"
 echo "IP: $IP  →  https://$HOST"
 
@@ -105,11 +108,13 @@ if ss -ltnp | grep -E "[:.](80|443) " | grep -vq caddy; then
   warn "Shu oynaning rasmini yuboring, birga sozlaymiz."
 else
   if ! command -v caddy >/dev/null; then
-    apt-get install -y -qq debian-keyring debian-archive-keyring apt-transport-https >/dev/null
-    curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor --yes -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
-    chmod o+r /usr/share/keyrings/caddy-stable-archive-keyring.gpg
-    curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' > /etc/apt/sources.list.d/caddy-stable.list
-    apt-get update -y -qq && apt-get install -y -qq caddy >/dev/null
+    if ! apt-get install -y -qq caddy >/dev/null 2>&1; then
+      apt-get install -y -qq debian-keyring debian-archive-keyring apt-transport-https >/dev/null
+      curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor --yes -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+      chmod o+r /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+      curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' > /etc/apt/sources.list.d/caddy-stable.list
+      apt-get update -y -qq && apt-get install -y -qq caddy >/dev/null
+    fi
   fi
   BLOCK="$HOST {
 	reverse_proxy 127.0.0.1:$PORT_VALUE
@@ -123,8 +128,11 @@ else
     ufw allow 80/tcp >/dev/null && ufw allow 443/tcp >/dev/null
   fi
   systemctl enable caddy >/dev/null 2>&1 || true
-  systemctl restart caddy
-  HTTPS_OK=1
+  if systemctl restart caddy; then
+    HTTPS_OK=1
+  else
+    warn "Caddy (HTTPS) ishga tushmadi: journalctl -u caddy --no-pager | tail -20"
+  fi
 fi
 
 sleep 8
