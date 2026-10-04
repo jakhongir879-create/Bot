@@ -473,7 +473,7 @@ async function downloadTelegramFile(fileId) {
 
 async function handleStockFile(ctx, employee, document) {
   if (document.file_size && document.file_size > config.maxUploadBytes) {
-    return ctx.reply("❗ Fayl hajmi 5 MB dan oshmasligi kerak.");
+    return ctx.reply("❗ Fayl hajmi 20 MB dan oshmasligi kerak.");
   }
   const [warehouseInput, responsibleInput] = String(ctx.message.caption || '')
     .split(/[;|]/)

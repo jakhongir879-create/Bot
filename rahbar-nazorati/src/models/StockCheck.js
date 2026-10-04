@@ -1,6 +1,6 @@
 const { prisma } = require('../database/connection');
 
-function createWithItems({ checkDate, warehouse, responsible, fileName, items }) {
+async function createWithItems({ checkDate, warehouse, responsible, fileName, items }) {
   const totals = items.reduce(
     (acc, item) => {
       if (item.diffSum < 0) acc.shortage += item.diffSum;
@@ -9,7 +9,7 @@ function createWithItems({ checkDate, warehouse, responsible, fileName, items })
     },
     { shortage: 0, surplus: 0 },
   );
-  return prisma.stockCheck.create({
+  const check = await prisma.stockCheck.create({
     data: {
       checkDate,
       warehouse,
@@ -19,9 +19,18 @@ function createWithItems({ checkDate, warehouse, responsible, fileName, items })
       shortageSum: totals.shortage,
       surplusSum: totals.surplus,
       itemCount: items.length,
-      items: { create: items },
     },
   });
+  try {
+    for (let i = 0; i < items.length; i += 5000) {
+      const chunk = items.slice(i, i + 5000).map((item) => ({ ...item, stockCheckId: check.id }));
+      await prisma.stockCheckItem.createMany({ data: chunk });
+    }
+  } catch (error) {
+    await prisma.stockCheck.delete({ where: { id: check.id } }).catch(() => {});
+    throw error;
+  }
+  return check;
 }
 
 function list() {

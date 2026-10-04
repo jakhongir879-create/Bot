@@ -129,7 +129,7 @@ Dashboard → **Xodimlar** bo'limida xodim qo'shing (telefon raqami bilan). Xodi
 - Mini App har bir so'rovda Telegram imzosini (initData) BOT_TOKEN orqali tekshiradi.
 - Middle manager faqat o'z vazifalarini ko'radi. Top manager o'zinikini va bo'ysunuvchilarinikini ko'radi, direktor esa hammasini ko'radi.
 - Dashboard JWT bilan himoyalangan. U **faqat shu kompyuterda** ochiladi, ngrok orqali tashqaridan ochib bo'lmaydi.
-- Yuklangan Excel fayllar formati (.xlsx, .xls, .csv) va hajmi (5 MB gacha) tekshiriladi.
+- Yuklangan Excel fayllar formati (.xlsx, .xls, .csv) va hajmi (20 MB gacha) tekshiriladi.
 - `.env` fayli GitHub'ga yuklanmaydi. Uni hech kimga bermang.
 
 > `npm install` vaqtida `xlsx` paketi haqida ogohlantirish chiqishi mumkin. Excel faylni faqat tizimga kirgan direktor yoki sklad mas'uli yuklay oladi, shuning uchun bu localhost ishlatish uchun xavfli emas.

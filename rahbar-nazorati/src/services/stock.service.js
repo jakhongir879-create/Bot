@@ -99,7 +99,7 @@ function parseWorkbook(buffer) {
     });
   }
   if (!items.length) throw new StockError("Faylda tovarlar topilmadi.");
-  if (items.length > 20000) throw new StockError("Fayl juda katta (20 000 qatordan ko'p).");
+  if (items.length > 200000) throw new StockError("Fayl juda katta (200 000 qatordan ko'p).");
   return { items, detectedColumns: map };
 }
 
@@ -109,7 +109,7 @@ function validateFile(fileName, size) {
     throw new StockError('Faqat Excel (.xlsx, .xls) yoki .csv fayl qabul qilinadi.');
   }
   if (size > config.maxUploadBytes) {
-    throw new StockError("Fayl hajmi 5 MB dan oshmasligi kerak.");
+    throw new StockError("Fayl hajmi 20 MB dan oshmasligi kerak.");
   }
 }
 

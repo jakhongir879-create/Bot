@@ -78,7 +78,7 @@ export default function Stock() {
     setUploadError(null);
     if (!f) return;
     if (!/\.(xlsx|xls|csv)$/i.test(f.name)) return setUploadError('Faqat Excel (.xlsx, .xls) yoki .csv fayl yuklang');
-    if (f.size > 5 * 1024 * 1024) return setUploadError('Fayl hajmi 5 MB dan oshmasligi kerak');
+    if (f.size > 20 * 1024 * 1024) return setUploadError('Fayl hajmi 20 MB dan oshmasligi kerak');
     setFile(f);
   };
 
@@ -149,7 +149,7 @@ export default function Stock() {
           >
             <div className="big"><FileSpreadsheet size={44} strokeWidth={1.5} color="#1baf7a" /></div>
             <div className="bold" style={{ marginTop: 8 }}>{file ? file.name : 'Excel faylni shu yerga tashlang'}</div>
-            <div className="small muted">yoki tanlash uchun bosing · .xlsx, .xls, .csv · 5 MB gacha</div>
+            <div className="small muted">yoki tanlash uchun bosing · .xlsx, .xls, .csv · 20 MB gacha</div>
             <input ref={inputRef} type="file" accept=".xlsx,.xls,.csv" hidden onChange={(e) => pickFile(e.target.files?.[0])} />
           </div>
           <div className="small muted" style={{ marginTop: 8 }}>

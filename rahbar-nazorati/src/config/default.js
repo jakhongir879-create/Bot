@@ -20,7 +20,7 @@ const config = {
   jwtSecret: clean(process.env.JWT_SECRET),
   webappUrl: clean(process.env.WEBAPP_URL).replace(/\/+$/, ''),
   dashboardPublic: clean(process.env.DASHBOARD_PUBLIC) === 'true',
-  maxUploadBytes: 5 * 1024 * 1024,
+  maxUploadBytes: 20 * 1024 * 1024,
   paths: {
     miniappDist: path.join(__dirname, '..', '..', 'miniapp', 'dist'),
     dashboardDist: path.join(__dirname, '..', '..', 'dashboard', 'dist'),
