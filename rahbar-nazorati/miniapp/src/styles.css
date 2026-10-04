@@ -22,7 +22,7 @@
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.04);
   --radius: 18px;
   --nav-h: 64px;
-  font-family: system-ui, -apple-system, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter', 'Segoe UI', Roboto, sans-serif;
 }
 
 :root[data-theme='dark'] {
@@ -908,4 +908,123 @@ input[type='range'] {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
+}
+
+/* ================= Apple "frosted glass" mavzusi ================= */
+:root {
+  --bg: #e8eef8;
+  --card: rgba(255, 255, 255, 0.62);
+  --card-2: rgba(255, 255, 255, 0.5);
+  --muted: #5d6470;
+  --text-2: #3a3f47;
+  --line: rgba(20, 40, 80, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.65);
+  --shadow: 0 8px 28px rgba(15, 45, 110, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  --veil: linear-gradient(180deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.55));
+  --solid: rgba(246, 248, 252, 0.94);
+}
+
+:root[data-theme='dark'] {
+  --bg: #0b1424;
+  --card: rgba(22, 26, 36, 0.58);
+  --card-2: rgba(255, 255, 255, 0.08);
+  --muted: #a3a9b5;
+  --text-2: #d0d4dc;
+  --line: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+  --veil: linear-gradient(180deg, rgba(0, 8, 24, 0.55), rgba(0, 4, 16, 0.72));
+  --solid: rgba(20, 24, 34, 0.95);
+}
+
+html {
+  background: var(--bg);
+}
+
+body {
+  background: transparent;
+}
+
+body::before,
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+body::before {
+  background: url('./assets/bg.webp') center / cover no-repeat;
+}
+
+body::after {
+  background: var(--veil);
+}
+
+.card,
+.list,
+.stat,
+.task-card,
+.chip,
+.option {
+  background: var(--card);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--glass-border);
+}
+
+.chip.active {
+  background: var(--text);
+  color: var(--bg);
+}
+
+.option.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.sheet,
+.sheet-footer {
+  background: var(--solid);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+}
+
+.sheet .card,
+.sheet .list,
+.sheet .stat,
+.sheet .task-card {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+:root[data-theme='dark'] .sheet .card,
+:root[data-theme='dark'] .sheet .list,
+:root[data-theme='dark'] .sheet .stat,
+:root[data-theme='dark'] .sheet .task-card {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.onboarding {
+  background: transparent;
+}
+
+.input {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+:root[data-theme='dark'] .input {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.page-title,
+.hero-name,
+.sheet-title {
+  letter-spacing: -0.03em;
+}
+
+.nav {
+  background: var(--solid);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
 }
