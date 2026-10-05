@@ -51,6 +51,12 @@ export default function Settings() {
             <span>Oylik hisobot sanasi (oyning nechanchi kuni)</span>
             <input className="input" type="number" min="1" max="28" value={form.monthlyReportDay} onChange={set('monthlyReportDay')} />
           </label>
+          <div className="card-title" style={{ margin: '18px 0 12px' }}>Ertalabki brifing</div>
+          <label className="checkbox" style={{ marginBottom: 12 }}>
+            <input type="checkbox" checked={form.morningBriefEnabled} onChange={(e) => setForm({ ...form, morningBriefEnabled: e.target.checked })} />
+            Har kuni direktor va top-menejerlarga bugungi holat va xavflarni yuborish
+          </label>
+          <label className="field"><span>Brifing vaqti (Toshkent vaqti)</span><input className="input" type="time" value={form.morningBriefTime} onChange={set('morningBriefTime')} /></label>
           <div className="row small">
             AI holati: {data.aiEnabled ? <Pill tone="green">Ulangan</Pill> : <Pill tone="muted">Ulanmagan (.env → ANTHROPIC_API_KEY)</Pill>}
           </div>

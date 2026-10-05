@@ -5,6 +5,7 @@ const Task = require('../models/Task');
 const notify = require('../services/notify.service');
 const ai = require('../services/ai.service');
 const Employee = require('../models/Employee');
+const brief = require('../services/brief.service');
 const { HOUR_MS, parts, monthLabel, monthKey, shiftMonth } = require('../utils/format');
 
 const include = Task.withPeople;
@@ -61,7 +62,19 @@ async function sendScheduledReport(kind) {
   await notify.sendLong(chatId, `${title} (${period})\n\n${result.report.text}`);
 }
 
-let lastRun = { weekly: null, monthly: null };
+let lastRun = { weekly: null, monthly: null, brief: null };
+
+async function sendMorningBriefs() {
+  const leaders = await prisma.employee.findMany({ where: { isActive: true, role: { in: ['DIRECTOR', 'TOP'] }, telegramId: { not: null } } });
+  for (const leader of leaders) {
+    try {
+      const text = await brief.build(leader);
+      await notify.send(leader.telegramId, text);
+    } catch (error) {
+      console.error(`[CRON] ${leader.fullName} uchun brifing yuborilmadi:`, error.message);
+    }
+  }
+}
 
 async function checkScheduledReports() {
   const company = await prisma.company.findFirst();
@@ -70,8 +83,13 @@ async function checkScheduledReports() {
   const monthDay = company?.monthlyReportDay ?? 1;
   const p = parts(new Date());
   const current = `${String(p.hour).padStart(2, '0')}:${String(p.minute).padStart(2, '0')}`;
-  if (current !== time) return;
   const today = `${p.year}-${p.month}-${p.day}`;
+  const briefTime = company?.morningBriefTime || '08:30';
+  if ((company?.morningBriefEnabled ?? true) && current === briefTime && lastRun.brief !== today) {
+    lastRun.brief = today;
+    await sendMorningBriefs();
+  }
+  if (current !== time) return;
   if (p.day === monthDay && lastRun.monthly !== today) {
     lastRun.monthly = today;
     await sendScheduledReport('monthly');

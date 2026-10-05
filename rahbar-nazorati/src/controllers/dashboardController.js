@@ -365,8 +365,10 @@ async function getSettings(req, res) {
 }
 
 async function updateSettings(req, res) {
-  const { name, industry, currency, weeklyReportTime, weeklyReportDay, monthlyReportDay } = req.body || {};
-  if (weeklyReportTime && !/^([01]\d|2[0-3]):[0-5]\d$/.test(weeklyReportTime)) throw new ValidationError("Vaqt noto'g'ri (masalan 09:00)");
+  const { name, industry, currency, weeklyReportTime, weeklyReportDay, monthlyReportDay, morningBriefTime, morningBriefEnabled } = req.body || {};
+  const timeRe = /^([01]\d|2[0-3]):[0-5]\d$/;
+  if (weeklyReportTime && !timeRe.test(weeklyReportTime)) throw new ValidationError("Vaqt noto'g'ri (masalan 09:00)");
+  if (morningBriefTime && !timeRe.test(morningBriefTime)) throw new ValidationError("Brifing vaqti noto'g'ri (masalan 08:30)");
   const day = Number(weeklyReportDay);
   const mday = Number(monthlyReportDay);
   const data = {
@@ -376,6 +378,8 @@ async function updateSettings(req, res) {
     weeklyReportTime: weeklyReportTime || '09:00',
     weeklyReportDay: day >= 0 && day <= 6 ? day : 1,
     monthlyReportDay: mday >= 1 && mday <= 28 ? mday : 1,
+    morningBriefTime: morningBriefTime || '08:30',
+    morningBriefEnabled: morningBriefEnabled === undefined ? true : Boolean(morningBriefEnabled),
   };
   const existing = await prisma.company.findFirst();
   const company = existing ? await prisma.company.update({ where: { id: existing.id }, data }) : await prisma.company.create({ data });

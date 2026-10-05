@@ -62,33 +62,35 @@ enum AiModule {
 }
 
 model Company {
-  id               Int      @id @default(autoincrement())
-  name             String
-  industry         String?
-  currency         String   @default("so'm")
-  weeklyReportTime String   @default("09:00")
-  weeklyReportDay  Int      @default(1)
-  monthlyReportDay Int      @default(1)
-  updatedAt        DateTime @updatedAt
+  id                  Int      @id @default(autoincrement())
+  name                String
+  industry            String?
+  currency            String   @default("so'm")
+  weeklyReportTime    String   @default("09:00")
+  weeklyReportDay     Int      @default(1)
+  monthlyReportDay    Int      @default(1)
+  morningBriefEnabled Boolean  @default(true)
+  morningBriefTime    String   @default("08:30")
+  updatedAt           DateTime @updatedAt
 }
 
 model Employee {
-  id                 Int         @id @default(autoincrement())
-  telegramId         String?     @unique
+  id                 Int           @id @default(autoincrement())
+  telegramId         String?       @unique
   fullName           String
-  phone              String      @unique
+  phone              String        @unique
   position           String?
   department         String?
-  role               Role        @default(MIDDLE)
+  role               Role          @default(MIDDLE)
   managerId          Int?
-  manager            Employee?   @relation("Subordinates", fields: [managerId], references: [id], onDelete: SetNull)
-  subordinates       Employee[]  @relation("Subordinates")
-  isActive           Boolean     @default(true)
-  isStockResponsible Boolean     @default(false)
-  onboarded          Boolean     @default(false)
-  createdAt          DateTime    @default(now())
-  assignedTasks      Task[]      @relation("TaskAssigner")
-  receivedTasks      Task[]      @relation("TaskAssignee")
+  manager            Employee?     @relation("Subordinates", fields: [managerId], references: [id], onDelete: SetNull)
+  subordinates       Employee[]    @relation("Subordinates")
+  isActive           Boolean       @default(true)
+  isStockResponsible Boolean       @default(false)
+  onboarded          Boolean       @default(false)
+  createdAt          DateTime      @default(now())
+  assignedTasks      Task[]        @relation("TaskAssigner")
+  receivedTasks      Task[]        @relation("TaskAssignee")
   histories          TaskHistory[]
   files              TaskFile[]
 

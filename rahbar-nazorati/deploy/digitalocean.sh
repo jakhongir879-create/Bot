@@ -86,6 +86,22 @@ EOF
   chmod 600 "$ENV_FILE"
   echo ".env yozildi"
 elif [ -f "$ENV_FILE" ]; then
+  set_env() {
+    local key="$1" value="$2"
+    if grep -qE "^$key=" "$ENV_FILE"; then
+      sed -i -E "s|^$key=.*|$key=\"$value\"|" "$ENV_FILE"
+    else
+      echo "$key=\"$value\"" >> "$ENV_FILE"
+    fi
+  }
+  if [ -n "${ANTHROPIC_API_KEY:-}" ]; then
+    case "$ANTHROPIC_API_KEY" in
+      sk-ant-*) set_env ANTHROPIC_API_KEY "$ANTHROPIC_API_KEY"; echo "AI kaliti yozildi" ;;
+      *) fail "API kalit sk-ant- bilan boshlanishi kerak. Kalitni to'liq nusxalaganingizni tekshiring." ;;
+    esac
+  fi
+  if [ -n "${CLAUDE_MODEL:-}" ]; then set_env CLAUDE_MODEL "$CLAUDE_MODEL"; fi
+  if [ -n "${ADMIN_PASSWORD:-}" ]; then set_env ADMIN_PASSWORD "$ADMIN_PASSWORD"; echo "Dashboard paroli yangilandi"; fi
   echo "Avvalgi .env saqlanib qoldi"
 else
   fail ".env topilmadi. Buyruqni sozlamalar (DATABASE_URL, BOT_TOKEN ...) bilan birga ishga tushiring."

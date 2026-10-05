@@ -7,7 +7,9 @@ const notify = require('../services/notify.service');
 const analytics = require('../services/analytics.service');
 const stockService = require('../services/stock.service');
 const ai = require('../services/ai.service');
-const { STATUS_ICONS, STATUS_LABELS, PRIORITY_ICONS, ROLE_LABELS, MODULE_LABELS } = require('../utils/labels');
+const agent = require('../services/agent.service');
+const brief = require('../services/brief.service');
+const { STATUS_ICONS, STATUS_LABELS, PRIORITY_ICONS, PRIORITY_LABELS, ROLE_LABELS, MODULE_LABELS } = require('../utils/labels');
 const {
   escapeHtml,
   formatDate,
@@ -84,9 +86,20 @@ async function sendWelcome(ctx, employee) {
     'Quyidagi menyudan foydalaning.',
   ];
   if (employee.role === 'DIRECTOR') {
-    lines.push('', "💬 Menga istalgan savolingizni yozishingiz mumkin, masalan: <i>\"Bu oy kim eng sust ishladi?\"</i> — AI bazadagi ma'lumotlar asosida javob beradi.");
+    lines.push(
+      '',
+      "🤖 <b>AI yordamchi:</b> menga oddiy so'z bilan yozing, men bajaraman. Masalan:",
+      "• <i>Azizga ertaga 18:00 gacha sklad hisobotini topshirishni ayt, muhim</i>",
+      "• <i>Muddati o'tgan vazifalar bo'yicha hammaga eslatma yubor</i>",
+      "• <i>Bu oy kim eng sust ishladi?</i>",
+      '',
+      "☀️ /brifing — bugungi holat va xavflar · 🧹 /yangi — AI suhbatini tozalash",
+    );
     lines.push("📦 Sklad sverkasi uchun Excel faylni shu yerga yuboring.");
-  } else if (employee.isStockResponsible) {
+  } else if (employee.role === 'TOP') {
+    lines.push('', "🤖 <b>AI yordamchi:</b> jamoangizga vazifa berish yoki natijalarni so'rash uchun menga oddiy so'z bilan yozing. ☀️ /brifing — jamoangizning bugungi holati.");
+  }
+  if (employee.role !== 'DIRECTOR' && employee.isStockResponsible) {
     lines.push('', "📦 Sklad sverkasi uchun Excel faylni shu yerga yuboring.");
   }
   await ctx.reply(lines.join('\n'), { parse_mode: 'HTML', reply_markup: mainMenu(employee) });
@@ -578,6 +591,72 @@ async function runAiReport(ctx, module) {
   return notify.sendLong(ctx.chat.id, `🤖 ${MODULE_LABELS[module]} — AI tahlil\n\n${result.report.text}`);
 }
 
+function draftCard(draft) {
+  const d = draft.data;
+  const lines = [
+    '📝 <b>Vazifa loyihasi</b> — tekshirib, tasdiqlang:',
+    '',
+    `👷 Ijrochi: <b>${escapeHtml(d.assigneeName)}</b>`,
+    `📌 <b>${escapeHtml(d.title)}</b>`,
+  ];
+  if (d.description) lines.push(`<i>${escapeHtml(d.description)}</i>`);
+  lines.push(`⏰ Deadline: ${formatDateTime(d.deadline)} (${timeLeft(d.deadline)})`, `${PRIORITY_ICONS[d.priority]} Muhimlik: ${PRIORITY_LABELS[d.priority]}`);
+  return lines.join('\n');
+}
+
+async function runAgent(ctx, employee, text) {
+  if (!ai.isEnabled()) return ctx.reply(ai.aiDisabledMessage());
+  await ctx.replyWithChatAction('typing').catch(() => {});
+  const typing = setInterval(() => ctx.replyWithChatAction('typing').catch(() => {}), 4500);
+  let result;
+  try {
+    result = await agent.run(employee, text);
+  } finally {
+    clearInterval(typing);
+  }
+  if (result.text) await notify.sendLong(ctx.chat.id, result.text);
+  for (const draft of result.drafts || []) {
+    await ctx.reply(draftCard(draft), {
+      parse_mode: 'HTML',
+      reply_markup: new InlineKeyboard().text('✅ Yuborish', `ai:ok:${draft.id}`).text('✖️ Bekor qilish', `ai:no:${draft.id}`),
+    });
+  }
+  return null;
+}
+
+async function handleDraftCallback(ctx, employee, action, id) {
+  const draft = agent.getDraft(id);
+  if (!draft || draft.actorId !== employee.id) {
+    await ctx.editMessageReplyMarkup().catch(() => {});
+    return ctx.reply("Bu loyiha eskirgan. AI'ga qaytadan yozing.");
+  }
+  agent.removeDraft(id);
+  if (action === 'no') {
+    await ctx.editMessageText(`${draftCard(draft)}\n\n✖️ <b>Bekor qilindi</b>`, { parse_mode: 'HTML' }).catch(() => {});
+    return null;
+  }
+  const d = draft.data;
+  if (!(await Employee.canAssignTo(employee, d.assigneeId))) return ctx.reply("Bu xodimga vazifa bera olmaysiz.");
+  const task = await Task.createTask({
+    title: d.title,
+    description: d.description,
+    assignerId: employee.id,
+    assigneeId: d.assigneeId,
+    deadline: d.deadline,
+    priority: d.priority,
+  });
+  await notify.taskCreated(task);
+  const warn = task.assignee.telegramId ? '' : "\n⚠️ Ijrochi hali botga ulanmagan — /start bosgach xabarni oladi.";
+  await ctx.editMessageText(`${draftCard(draft)}\n\n✅ <b>Yuborildi</b> (#${task.id})${warn}`, { parse_mode: 'HTML' }).catch(() => {});
+  return null;
+}
+
+async function sendBrief(ctx, employee) {
+  await ctx.replyWithChatAction('typing').catch(() => {});
+  const text = await brief.build(employee);
+  return notify.send(ctx.chat.id, text);
+}
+
 async function answerDirectorQuestion(ctx, question) {
   await ctx.reply('⏳ Savolingiz tahlil qilinmoqda...');
   await ctx.replyWithChatAction('typing').catch(() => {});
@@ -623,7 +702,7 @@ async function handleText(ctx) {
     if (session.step === 'await_file') return ctx.reply('📎 Fayl yoki rasm yuboring. Bekor qilish uchun menyudagi istalgan tugmani bosing.');
   }
 
-  if (employee.role === 'DIRECTOR') return answerDirectorQuestion(ctx, text);
+  if (employee.role === 'DIRECTOR' || employee.role === 'TOP') return runAgent(ctx, employee, text);
   return ctx.reply('Iltimos, pastdagi menyudan foydalaning 👇', { reply_markup: mainMenu(employee) });
 }
 
@@ -651,6 +730,10 @@ async function handleCallback(ctx) {
       await ctx.editMessageReplyMarkup().catch(() => {});
       return await attachFile(ctx, employee, Number(action), session.data.fileInfo);
     }
+    if (scope === 'ai') {
+      await ctx.answerCallbackQuery();
+      return await handleDraftCallback(ctx, employee, action, id);
+    }
     if (scope === 'r' && action === 'ai') {
       await ctx.answerCallbackQuery();
       if (employee.role !== 'DIRECTOR') return ctx.reply("AI tahlil faqat direktor uchun.");
@@ -663,7 +746,23 @@ async function handleCallback(ctx) {
   }
 }
 
+async function handleBriefCommand(ctx) {
+  const employee = await requireEmployee(ctx);
+  if (!employee) return null;
+  if (employee.role === 'MIDDLE') return ctx.reply('Brifing faqat rahbarlar uchun.');
+  return sendBrief(ctx, employee);
+}
+
+async function handleResetCommand(ctx) {
+  const employee = await requireEmployee(ctx);
+  if (!employee) return null;
+  agent.resetConversation(employee.id);
+  return ctx.reply("🧹 AI bilan suhbat tozalandi. Yangi mavzuda yozishingiz mumkin.");
+}
+
 module.exports = {
+  handleBriefCommand,
+  handleResetCommand,
   handleStart,
   handleContact,
   handleText,

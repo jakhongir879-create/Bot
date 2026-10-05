@@ -79,25 +79,28 @@ function extractText(response) {
     .trim();
 }
 
-async function callClaude(system, userContent) {
-  const base = {
-    model: config.claudeModel,
-    max_tokens: 8000,
-    system,
-    messages: [{ role: 'user', content: userContent }],
-  };
-  let response;
+/** Claude'ga so'rov: server tomonidagi zaxira model bilan, rad etilsa oddiy so'rov bilan */
+async function rawCreate(params) {
   try {
-    response = await client.beta.messages.create({
-      ...base,
+    return await client.beta.messages.create({
+      ...params,
       output_config: { effort: 'medium' },
       betas: ['server-side-fallback-2026-07-01'],
       fallbacks: 'default',
     });
   } catch (error) {
     if (!(error instanceof Anthropic.BadRequestError) || /credit|balance|billing/i.test(error.message)) throw error;
-    response = await client.messages.create(base);
+    return client.messages.create(params);
   }
+}
+
+async function callClaude(system, userContent) {
+  const response = await module.exports.rawCreate({
+    model: config.claudeModel,
+    max_tokens: 8000,
+    system,
+    messages: [{ role: 'user', content: userContent }],
+  });
   const text = extractText(response);
   if (!text) throw new Error('AI javob bermadi');
   return text;
@@ -388,4 +391,16 @@ async function evaluateDecision(evaluated) {
   }
 }
 
-module.exports = { generateReport, askQuestion, evaluateDecision, isEnabled: () => Boolean(client), aiDisabledMessage };
+module.exports = {
+  generateReport,
+  askQuestion,
+  evaluateDecision,
+  isEnabled: () => Boolean(client),
+  aiDisabledMessage,
+  friendlyError,
+  rawCreate,
+  callClaude,
+  extractText,
+  BASE_SYSTEM,
+  CONTEXT_BUILDERS,
+};
