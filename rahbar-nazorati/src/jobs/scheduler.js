@@ -43,9 +43,8 @@ async function sendReminders() {
 }
 
 async function directorChatId() {
-  if (config.directorTelegramId) return config.directorTelegramId;
   const director = await Employee.getDirector();
-  return director?.telegramId || null;
+  return director?.telegramId || config.directorTelegramId || null;
 }
 
 async function sendScheduledReport(kind) {

@@ -62,7 +62,7 @@ async function currentEmployee(ctx) {
   let employee = await Employee.findByTelegramId(telegramId);
   if (!employee && telegramId === config.directorTelegramId) {
     const director = await Employee.getDirector();
-    if (director) employee = await Employee.linkTelegram(director.id, telegramId);
+    if (director && !director.telegramId) employee = await Employee.linkTelegram(director.id, telegramId);
   }
   return employee;
 }
@@ -124,7 +124,8 @@ async function handleContact(ctx) {
   }
   let employee = await Employee.findByPhone(contact.phone_number);
   if (!employee && String(ctx.from.id) === config.directorTelegramId) {
-    employee = await Employee.getDirector();
+    const director = await Employee.getDirector();
+    if (director && !director.telegramId) employee = director;
   }
   if (!employee) {
     return ctx.reply('Siz tizimda ro\'yxatdan o\'tmagansiz, rahbaringizga murojaat qiling.', {

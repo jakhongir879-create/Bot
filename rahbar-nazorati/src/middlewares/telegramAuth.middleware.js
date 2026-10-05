@@ -41,7 +41,7 @@ async function telegramAuth(req, res, next) {
     let employee = await Employee.findByTelegramId(user.id);
     if (!employee && String(user.id) === config.directorTelegramId) {
       const director = await Employee.getDirector();
-      if (director) employee = await Employee.linkTelegram(director.id, user.id);
+      if (director && !director.telegramId) employee = await Employee.linkTelegram(director.id, user.id);
     }
     if (!employee) {
       return res.status(403).json({ error: "Siz tizimda ro'yxatdan o'tmagansiz. Avval botga /start yozib, telefon raqamingizni yuboring." });
