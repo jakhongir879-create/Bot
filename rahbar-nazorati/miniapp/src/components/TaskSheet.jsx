@@ -160,7 +160,10 @@ export default function TaskSheet({ taskId, onClose, onChanged }) {
     <Sheet open onClose={onClose} footer={footer}>
       <div className="row between" style={{ marginBottom: 8 }}>
         <StatusPill task={task} />
-        <PriorityPill priority={task.priority} />
+        <span className="row" style={{ gap: 6 }}>
+          {task.kpiWeight && <span className="small muted">KPI {task.kpiWeight}/5</span>}
+          <PriorityPill priority={task.priority} />
+        </span>
       </div>
       <div className="sheet-title">{task.title}</div>
       {task.description && (

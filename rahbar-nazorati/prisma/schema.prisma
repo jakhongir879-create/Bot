@@ -107,6 +107,7 @@ model Task {
   assignee        Employee      @relation("TaskAssignee", fields: [assigneeId], references: [id])
   deadline        DateTime
   priority        Priority      @default(ORTA)
+  kpiWeight       Int           @default(3)
   status          TaskStatus    @default(YANGI)
   progress        Int           @default(0)
   acceptedAt      DateTime?

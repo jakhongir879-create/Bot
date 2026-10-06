@@ -49,6 +49,7 @@ const TOOLS = [
         description: { type: 'string', description: "Nima qilish kerak va natija qanday bo'lishi kerak. Aniq va tushunarli yozing." },
         deadline: { type: 'string', description: "Toshkent vaqti bo'yicha, format: YYYY-MM-DD HH:mm" },
         priority: { type: 'string', enum: ['PAST', 'ORTA', 'YUQORI'] },
+        kpi_weight: { type: 'integer', minimum: 1, maximum: 5, description: "KPI og'irligi 1–5 (5 — eng muhim). Rahbar aytmasa, bermang." },
       },
       required: ['employee_id', 'title', 'description', 'deadline', 'priority'],
       additionalProperties: false,
@@ -197,7 +198,7 @@ const HANDLERS = {
       id,
       actorId: actor.id,
       createdAt: Date.now(),
-      data: { assigneeId: employee.id, assigneeName: employee.fullName, title: String(input.title).slice(0, 200), description: String(input.description || '').slice(0, 3000), deadline, priority },
+      data: { assigneeId: employee.id, assigneeName: employee.fullName, title: String(input.title).slice(0, 200), description: String(input.description || '').slice(0, 3000), deadline, priority, kpiWeight: input.kpi_weight },
     };
     drafts.set(id, draft);
     run.drafts.push(draft);

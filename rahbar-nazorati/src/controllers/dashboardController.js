@@ -7,6 +7,7 @@ const AiReport = require('../models/AiReport');
 const analytics = require('../services/analytics.service');
 const stockService = require('../services/stock.service');
 const ai = require('../services/ai.service');
+const notify = require('../services/notify.service');
 const { METRICS, EXPENSE_CATEGORIES, ROLE_LABELS } = require('../utils/labels');
 const { normalizePhone, startOfDay, endOfDay, tashkentDate } = require('../utils/format');
 
@@ -48,7 +49,56 @@ function validMonth(value) {
 
 /* ======================== Bosh sahifa ======================== */
 
+/** Bo'lim boshlig'i ko'radigan vazifalar egalari: o'zi + bo'ysunuvchilari (direktor uchun null = hammasi) */
+function taskScope(viewer) {
+  return viewer.scopeIds ? [viewer.employee.id, ...viewer.scopeIds] : null;
+}
+
+function canSeeEmployee(viewer, id) {
+  return !viewer.scopeIds || id === viewer.employee.id || viewer.scopeIds.includes(Number(id));
+}
+
+async function me(req, res) {
+  const v = req.viewer;
+  res.json({
+    name: v.name,
+    role: v.role,
+    isDirector: v.isDirector,
+    employeeId: v.employee?.id || null,
+    department: v.employee?.department || null,
+    aiEnabled: ai.isEnabled() && v.isDirector,
+  });
+}
+
+async function teamOverview(viewer) {
+  const now = new Date();
+  const from = new Date(now.getTime() - 30 * 86400000);
+  const ids = viewer.scopeIds;
+  const [tasksSummary, rows, overdueNow] = await Promise.all([
+    analytics.taskSummary({ from, to: now, where: { assigneeId: { in: ids } }, now }),
+    ids.length ? analytics.ranking({ days: 30, employeeIds: ids, now }) : [],
+    prisma.task.count({ where: { assigneeId: { in: ids }, status: { in: Task.ACTIVE_STATUSES }, deadline: { lt: now } } }),
+  ]);
+  const scored = rows.filter((r) => r.score !== null);
+  const avgScore = scored.length ? Math.round((scored.reduce((s, r) => s + r.score, 0) / scored.length) * 10) / 10 : null;
+  return {
+    team: true,
+    tasks: { ...tasksSummary, overdueNow },
+    avgScore,
+    statusCounts: {
+      faol: rows.filter((r) => r.status.key === 'FAOL').length,
+      ortacha: rows.filter((r) => r.status.key === 'ORTACHA').length,
+      sust: rows.filter((r) => r.status.key === 'SUST').length,
+    },
+    topEmployees: scored.slice(0, 3),
+    weakEmployees: scored.slice(-3).reverse(),
+    lastStockCheck: null,
+    finance: null,
+  };
+}
+
 async function overview(req, res) {
+  if (!req.viewer.isDirector) return res.json({ ...(await teamOverview(req.viewer)), aiSummary: null, aiEnabled: false });
   const [data, report] = await Promise.all([analytics.overview(), AiReport.latest('UMUMIY')]);
   res.json({ ...data, aiSummary: report, aiEnabled: ai.isEnabled() });
 }
@@ -59,6 +109,8 @@ async function tasks(req, res) {
   const { employeeId, department, status, from, to } = req.query;
   const now = new Date();
   const where = { AND: [] };
+  const scope = taskScope(req.viewer);
+  if (scope) where.AND.push({ assigneeId: { in: scope } });
   if (employeeId) where.AND.push({ assigneeId: Number(employeeId) });
   if (department) where.AND.push({ assignee: { department } });
   if (status === 'MUDDATI_OTGAN') where.AND.push({ status: { in: Task.ACTIVE_STATUSES }, deadline: { lt: now } });
@@ -89,8 +141,8 @@ async function tasks(req, res) {
     byStatus[key] = (byStatus[key] || 0) + 1;
   }
   const [employees, departments] = await Promise.all([
-    prisma.employee.findMany({ select: { id: true, fullName: true }, orderBy: { fullName: 'asc' } }),
-    prisma.employee.findMany({ where: { department: { not: null } }, select: { department: true }, distinct: ['department'] }),
+    prisma.employee.findMany({ where: scope ? { id: { in: scope } } : {}, select: { id: true, fullName: true }, orderBy: { fullName: 'asc' } }),
+    prisma.employee.findMany({ where: { department: { not: null }, ...(scope ? { id: { in: scope } } : {}) }, select: { department: true }, distinct: ['department'] }),
   ]);
   res.json({
     tasks: list.map((t) => {
@@ -107,21 +159,76 @@ async function tasks(req, res) {
 
 async function taskDetail(req, res) {
   const detail = await Task.getDetail(req.params.id);
-  if (!detail) return res.status(404).json({ error: 'Vazifa topilmadi' });
-  return res.json({ task: detail });
+  if (!detail || !canSeeEmployee(req.viewer, detail.assigneeId)) return res.status(404).json({ error: 'Vazifa topilmadi' });
+  const v = req.viewer;
+  return res.json({
+    task: detail,
+    permissions: {
+      canRate: detail.status === 'BAJARILDI' && !detail.qualityScore && (v.isDirector || detail.assignerId === v.employee?.id),
+      canRemind: Task.ACTIVE_STATUSES.includes(detail.status) && Boolean(detail.assignee.telegramId),
+    },
+  });
+}
+
+async function assignees(req, res) {
+  const actor = req.viewer.employee;
+  if (!actor) return res.json({ employees: [] });
+  const list = await Employee.getAssignableEmployees(actor);
+  res.json({ employees: list.map((e) => ({ id: e.id, fullName: e.fullName, position: e.position, department: e.department, role: e.role, roleLabel: ROLE_LABELS[e.role] })) });
+}
+
+async function createTask(req, res) {
+  const actor = req.viewer.employee;
+  if (!actor) throw new ValidationError("Avval Xodimlar bo'limida direktorni kiriting");
+  const { assigneeId, title, description, deadline, priority, kpiWeight } = req.body || {};
+  if (!(await Employee.canAssignTo(actor, assigneeId))) throw new ValidationError('Bu xodimga vazifa bera olmaysiz');
+  const when = new Date(deadline);
+  if (Number.isNaN(when.getTime()) || when < new Date()) throw new ValidationError("Deadline kelajakdagi sana bo'lishi kerak");
+  const task = await Task.createTask({ title, description, assignerId: actor.id, assigneeId, deadline: when, priority, kpiWeight });
+  await notify.taskCreated(task);
+  res.status(201).json({ task });
+}
+
+async function taskAction(req, res) {
+  const task = await Task.getById(req.params.id);
+  if (!task || !canSeeEmployee(req.viewer, task.assigneeId)) return res.status(404).json({ error: 'Vazifa topilmadi' });
+  const actor = req.viewer.employee;
+  if (!actor) throw new ValidationError("Avval Xodimlar bo'limida direktorni kiriting");
+  const { action, score, comment } = req.body || {};
+  let updated;
+  if (action === 'rate') {
+    updated = await Task.rate(task, actor, score);
+    await notify.taskRated(updated);
+  } else if (action === 'return') {
+    updated = await Task.returnForRework(task, actor, comment);
+    await notify.taskReturned(updated, comment);
+  } else if (action === 'remind') {
+    if (!Task.ACTIVE_STATUSES.includes(task.status)) throw new ValidationError('Vazifa allaqachon yakunlangan');
+    if (!task.assignee.telegramId) throw new ValidationError('Ijrochi hali botga ulanmagan');
+    const head = Task.isOverdue(task) ? "🚨 <b>Rahbaringiz eslatmoqda: vazifa muddati o'tgan</b>" : '⏰ <b>Rahbaringiz eslatmoqda</b>';
+    await notify.send(task.assignee.telegramId, `${head}\n\n${notify.taskCard(task)}`, { reply_markup: notify.executorKeyboard(task) });
+    updated = task;
+  } else {
+    throw new ValidationError("Noma'lum amal");
+  }
+  res.json({ task: updated });
 }
 
 /* ======================== Faollik ======================== */
 
 async function activity(req, res) {
   const days = [7, 30, 90].includes(Number(req.query.days)) ? Number(req.query.days) : 30;
-  const [rows, weekly] = await Promise.all([analytics.ranking({ days }), analytics.teamWeeklyTrend({ weeks: 8 })]);
+  const ids = req.viewer.scopeIds;
+  const [rows, weekly] = await Promise.all([
+    analytics.ranking({ days, employeeIds: ids }),
+    analytics.teamWeeklyTrend({ weeks: 8, employeeIds: ids }),
+  ]);
   res.json({ days, ranking: rows, comparison: analytics.roleComparison(rows), weekly, weights: analytics.WEIGHTS });
 }
 
 async function employeeActivity(req, res) {
   const id = Number(req.params.id);
-  const employee = await Employee.findById(id);
+  const employee = canSeeEmployee(req.viewer, id) ? await Employee.findById(id) : null;
   if (!employee) return res.status(404).json({ error: 'Xodim topilmadi' });
   const [metrics, trend, taskList] = await Promise.all([
     analytics.employeeMetrics(id, 90),
@@ -388,6 +495,10 @@ async function updateSettings(req, res) {
 
 module.exports = {
   ValidationError,
+  me,
+  assignees,
+  createTask,
+  taskAction,
   overview,
   tasks,
   taskDetail,

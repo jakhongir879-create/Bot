@@ -75,6 +75,8 @@ export const STATUS = {
 
 export const PRIORITY = { PAST: { label: 'Past', tone: 'green' }, ORTA: { label: "O'rta", tone: 'yellow' }, YUQORI: { label: 'Yuqori', tone: 'red' } };
 
+export const KPI_LEVELS = { 1: 'Juda past', 2: 'Past', 3: "O'rta", 4: 'Yuqori', 5: 'Juda muhim' };
+
 export const REASONS = {
   RESURS_YETMADI: 'Resurs yetmadi',
   BOSHQA_BOLIMGA_BOGLIQ: "Boshqa bo'limga bog'liq",

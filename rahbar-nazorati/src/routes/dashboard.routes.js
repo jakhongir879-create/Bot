@@ -1,7 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const { config } = require('../config/default');
-const { adminAuth, login } = require('../middlewares/adminAuth.middleware');
+const { adminAuth, login, magicLogin, requireDirector } = require('../middlewares/adminAuth.middleware');
 const d = require('../controllers/dashboardController');
 const { ALLOWED_EXTENSIONS } = require('../services/stock.service');
 
@@ -18,15 +18,22 @@ const excelUpload = multer({
 const router = express.Router();
 
 router.post('/login', login);
+router.post('/magic', magicLogin);
 router.use(adminAuth);
 
+/* Direktor va bo'lim boshliqlari (o'z jamoasi doirasida) */
+router.get('/me', d.me);
 router.get('/overview', d.overview);
-
 router.get('/tasks', d.tasks);
+router.post('/tasks', d.createTask);
 router.get('/tasks/:id', d.taskDetail);
-
+router.post('/tasks/:id/action', d.taskAction);
+router.get('/assignees', d.assignees);
 router.get('/activity', d.activity);
 router.get('/activity/:id', d.employeeActivity);
+
+/* Faqat direktor */
+router.use(requireDirector);
 
 router.post('/stock/upload', excelUpload.single('file'), d.stockUpload);
 router.get('/stock/checks', d.stockChecks);

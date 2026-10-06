@@ -1,8 +1,10 @@
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const { config } = require('../config/default');
+const Employee = require('../models/Employee');
 
 const TOKEN_TTL = '12h';
+const MAGIC_TTL = '10m';
 
 function safeEqual(a, b) {
   const ha = crypto.createHash('sha256').update(String(a)).digest();
@@ -43,16 +45,79 @@ function login(req, res) {
   return res.json({ token, login: config.adminLogin });
 }
 
-function adminAuth(req, res, next) {
+/* ---------- Telegram orqali bir martalik kirish havolasi ---------- */
+
+const usedMagic = new Map();
+setInterval(() => {
+  const now = Date.now();
+  for (const [nonce, exp] of usedMagic) if (exp < now) usedMagic.delete(nonce);
+}, 10 * 60 * 1000).unref();
+
+function createMagicToken(employee) {
+  return jwt.sign({ typ: 'magic', emp: employee.id, nonce: crypto.randomBytes(8).toString('hex') }, config.jwtSecret, { expiresIn: MAGIC_TTL });
+}
+
+async function magicLogin(req, res) {
+  let payload;
+  try {
+    payload = jwt.verify(String(req.body?.token || ''), config.jwtSecret);
+  } catch {
+    return res.status(401).json({ error: "Havola eskirgan. Botda «💻 Kompyuterda ochish» tugmasini qayta bosing." });
+  }
+  if (payload.typ !== 'magic' || usedMagic.has(payload.nonce)) {
+    return res.status(401).json({ error: "Bu havola allaqachon ishlatilgan. Botdan yangi havola oling." });
+  }
+  usedMagic.set(payload.nonce, payload.exp * 1000);
+  const employee = await Employee.findById(payload.emp);
+  if (!employee || !employee.isActive || !['DIRECTOR', 'TOP'].includes(employee.role)) {
+    return res.status(403).json({ error: "Kompyuter paneli faqat direktor va bo'lim boshliqlari uchun." });
+  }
+  const token = jwt.sign({ sub: 'employee', emp: employee.id }, config.jwtSecret, { expiresIn: TOKEN_TTL });
+  return res.json({ token, login: employee.fullName });
+}
+
+/** So'rov kim nomidan kelganini aniqlaydi: req.viewer = { employee, role, scopeIds, isDirector } */
+async function adminAuth(req, res, next) {
   const header = req.get('Authorization') || '';
   const token = header.startsWith('Bearer ') ? header.slice(7) : null;
   if (!token) return res.status(401).json({ error: 'Tizimga kiring' });
+  let payload;
   try {
-    req.admin = jwt.verify(token, config.jwtSecret);
-    return next();
+    payload = jwt.verify(token, config.jwtSecret);
   } catch {
     return res.status(401).json({ error: 'Sessiya muddati tugadi, qaytadan kiring' });
   }
+  try {
+    if (payload.sub === 'admin') {
+      const director = await Employee.getDirector();
+      req.viewer = { kind: 'admin', employee: director, role: 'DIRECTOR', isDirector: true, scopeIds: null, name: director?.fullName || config.adminLogin };
+      return next();
+    }
+    if (payload.sub === 'employee') {
+      const employee = await Employee.findById(payload.emp);
+      if (!employee || !employee.isActive || !['DIRECTOR', 'TOP'].includes(employee.role)) {
+        return res.status(401).json({ error: "Kirish huquqi bekor qilingan" });
+      }
+      const isDirector = employee.role === 'DIRECTOR';
+      req.viewer = {
+        kind: 'employee',
+        employee,
+        role: employee.role,
+        isDirector,
+        scopeIds: isDirector ? null : await Employee.getSubordinateIds(employee.id),
+        name: employee.fullName,
+      };
+      return next();
+    }
+  } catch (error) {
+    return next(error);
+  }
+  return res.status(401).json({ error: 'Tizimga kiring' });
 }
 
-module.exports = { adminAuth, login };
+function requireDirector(req, res, next) {
+  if (req.viewer?.isDirector) return next();
+  return res.status(403).json({ error: "Bu bo'lim faqat direktor uchun" });
+}
+
+module.exports = { adminAuth, login, magicLogin, createMagicToken, requireDirector };

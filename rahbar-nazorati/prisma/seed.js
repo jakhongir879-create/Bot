@@ -191,6 +191,7 @@ async function seedTasks(director, tops, middles) {
       assigneeId: assignee.id,
       deadline,
       priority,
+      kpiWeight: { PAST: 2, ORTA: 3, YUQORI: 4 }[priority] + (Math.random() < 0.25 ? 1 : 0),
       status: 'YANGI',
       progress: 0,
       createdAt,

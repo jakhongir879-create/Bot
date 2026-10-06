@@ -12,15 +12,17 @@ export default function Overview() {
   if (error) return <div className="alert">{error}</div>;
   const c = chartColors();
   const { tasks, avgScore, lastStockCheck, finance, statusCounts, topEmployees, weakEmployees } = data;
-  const cur = finance.current;
+  const cur = finance?.current;
+  const team = Boolean(data.team);
 
   return (
     <>
-      <PageHead title="Bosh sahifa" sub="Kompaniyaning asosiy ko'rsatkichlari · oxirgi 30 kun" />
+      <PageHead title="Bosh sahifa" sub={team ? "Jamoangiz ko'rsatkichlari · oxirgi 30 kun" : "Kompaniyaning asosiy ko'rsatkichlari · oxirgi 30 kun"} />
       <div className="grid grid-kpi">
         <Kpi label="Vazifalar bajarilishi" value={pct(tasks.completionRate)} foot={`Muddatida: ${pct(tasks.onTimeRate)} · ${tasks.total} ta vazifa`} tone={tasks.completionRate >= 80 ? 'green' : tasks.completionRate >= 60 ? 'yellow' : 'red'} />
         <Kpi label="Muddati o'tganlar" value={tasks.overdueNow} foot="Hozirgi holat bo'yicha" tone={tasks.overdueNow ? 'red' : 'green'} />
         <Kpi label="O'rtacha faollik bali" value={num(avgScore, 0)} foot={<span className="row" style={{ gap: 10 }}><span className="row" style={{ gap: 5 }}><StatusDot tone="green" />{statusCounts.faol}</span><span className="row" style={{ gap: 5 }}><StatusDot tone="yellow" />{statusCounts.ortacha}</span><span className="row" style={{ gap: 5 }}><StatusDot tone="red" />{statusCounts.sust}</span></span>} tone={scoreTone(avgScore)} />
+        {!team && (<>
         <Kpi
           label="Oxirgi sverka farqi"
           value={lastStockCheck ? compactMoney(lastStockCheck.totalDiff) : '—'}
@@ -29,8 +31,10 @@ export default function Overview() {
         />
         <Kpi label={`Tushum (${cur ? monthLabel(cur.month) : '—'})`} value={cur ? compactMoney(cur.revenue) : '—'} foot={cur ? `Reja bajarilishi: ${pct(cur.planExecution)}` : "Moliyaviy ma'lumot yo'q"} tone={cur && cur.planExecution >= 100 ? 'green' : undefined} />
         <Kpi label="Sof foyda marjasi" value={cur ? pct(cur.netMargin) : '—'} foot={cur ? `Sof foyda: ${money(cur.netProfit)}` : ''} tone={cur && cur.netMargin < 0 ? 'red' : undefined} />
+        </>)}
       </div>
 
+      {!team && (<>
       <div className="section-title row" style={{ gap: 8 }}><Sparkles size={20} strokeWidth={1.75} color="#5e5ce6" />AI umumiy xulosa</div>
       <AiBlock module="UMUMIY" title="AI umumiy xulosa" />
 
@@ -72,6 +76,7 @@ export default function Overview() {
           )}
         </div>
       </div>
+      </>)}
 
       <div className="grid grid-2" style={{ marginTop: 16 }}>
         <div className="card">

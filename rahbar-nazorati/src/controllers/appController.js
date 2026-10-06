@@ -16,6 +16,7 @@ function serializeTask(task, now = new Date()) {
     description: task.description,
     deadline: task.deadline,
     priority: task.priority,
+    kpiWeight: task.kpiWeight,
     status: task.status,
     progress: task.progress,
     acceptedAt: task.acceptedAt,
@@ -165,11 +166,11 @@ async function assignees(req, res) {
 
 async function createTask(req, res) {
   const employee = req.employee;
-  const { title, description, assigneeId, deadline, priority } = req.body || {};
+  const { title, description, assigneeId, deadline, priority, kpiWeight } = req.body || {};
   if (employee.role === 'MIDDLE') return res.status(403).json({ error: "Sizda vazifa berish huquqi yo'q" });
   if (!(await Employee.canAssignTo(employee, assigneeId))) return res.status(403).json({ error: 'Bu xodimga vazifa bera olmaysiz' });
   if (new Date(deadline) < new Date()) return res.status(400).json({ error: "Deadline o'tib ketgan sana bo'lmasligi kerak" });
-  const task = await Task.createTask({ title, description, assignerId: employee.id, assigneeId, deadline, priority });
+  const task = await Task.createTask({ title, description, assignerId: employee.id, assigneeId, deadline, priority, kpiWeight });
   await notify.taskCreated(task);
   return res.status(201).json({ task: serializeTask(task) });
 }

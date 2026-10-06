@@ -21,12 +21,12 @@ const PRESETS = [
 
 export default function NewTaskSheet({ open, onClose, onCreated }) {
   const [people, setPeople] = useState([]);
-  const [form, setForm] = useState({ assigneeId: '', title: '', description: '', deadline: toLocalInput(presetDate(1)), priority: 'ORTA' });
+  const [form, setForm] = useState({ assigneeId: '', title: '', description: '', deadline: toLocalInput(presetDate(1)), priority: 'ORTA', kpiWeight: 3 });
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     if (!open) return;
-    setForm({ assigneeId: '', title: '', description: '', deadline: toLocalInput(presetDate(1)), priority: 'ORTA' });
+    setForm({ assigneeId: '', title: '', description: '', deadline: toLocalInput(presetDate(1)), priority: 'ORTA', kpiWeight: 3 });
     api
       .assignees()
       .then((d) => setPeople(d.employees))
@@ -104,12 +104,23 @@ export default function NewTaskSheet({ open, onClose, onCreated }) {
             ['ORTA', "O'rta", 'yellow'],
             ['YUQORI', 'Yuqori', 'red'],
           ].map(([key, label, tone]) => (
-            <button key={key} className={`option row ${form.priority === key ? 'active' : ''}`} style={{ justifyContent: 'center', gap: 6 }} onClick={() => setForm((f) => ({ ...f, priority: key }))}>
+            <button key={key} className={`option row ${form.priority === key ? 'active' : ''}`} style={{ justifyContent: 'center', gap: 6 }} onClick={() => setForm((f) => ({ ...f, priority: key, kpiWeight: { PAST: 2, ORTA: 3, YUQORI: 4 }[key] }))}>
               <span className={`dot ${tone}`} />
               {label}
             </button>
           ))}
         </div>
+      </div>
+      <div className="field">
+        <span>KPI og'irligi: {form.kpiWeight}/5</span>
+        <div className="option-grid" style={{ gridTemplateColumns: 'repeat(5, 1fr)' }}>
+          {[1, 2, 3, 4, 5].map((n) => (
+            <button key={n} className={`option ${form.kpiWeight === n ? 'active' : ''}`} style={{ textAlign: 'center' }} onClick={() => setForm((f) => ({ ...f, kpiWeight: n }))}>
+              {n}
+            </button>
+          ))}
+        </div>
+        <div className="small muted" style={{ marginTop: 6 }}>5 — eng muhim: faollik baliga ko'proq ta'sir qiladi</div>
       </div>
     </Sheet>
   );

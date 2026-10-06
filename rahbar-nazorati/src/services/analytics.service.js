@@ -31,9 +31,13 @@ function computeMetrics(tasks, now = new Date()) {
   const overdue = tasks.filter((t) => isOverdue(t, now));
   const active = tasks.filter((t) => ACTIVE_STATUSES.includes(t.status));
 
+  // Har bir vazifa KPI og'irligi (1–5) bilan hisoblanadi: muhim vazifa ballga ko'proq ta'sir qiladi
+  const w = (t) => t.kpiWeight || 3;
+  const sumW = (list) => list.reduce((s, t) => s + w(t), 0);
   const due = done.length + failed.length + overdue.length;
   const onTimeDone = done.filter((t) => new Date(t.completedAt) <= new Date(t.deadline));
-  const onTimeRate = due ? (onTimeDone.length / due) * 100 : null;
+  const dueWeight = sumW(done) + sumW(failed) + sumW(overdue);
+  const onTimeRate = dueWeight ? (sumW(onTimeDone) / dueWeight) * 100 : null;
 
   const acceptHours = tasks
     .filter((t) => t.acceptedAt)
@@ -41,11 +45,12 @@ function computeMetrics(tasks, now = new Date()) {
   const avgAcceptHours = avg(acceptHours);
   const acceptSpeedScore = avgAcceptHours === null ? null : clamp(100 - ((avgAcceptHours - 1) / 23) * 100);
 
-  const ratios = done.map((t) => {
-    const planned = Math.max(HOUR_MS, new Date(t.deadline) - new Date(t.createdAt));
-    return (new Date(t.completedAt) - new Date(t.createdAt)) / planned;
-  });
-  const avgRatio = avg(ratios);
+  const avgRatio = done.length
+    ? done.reduce((s, t) => {
+        const planned = Math.max(HOUR_MS, new Date(t.deadline) - new Date(t.createdAt));
+        return s + w(t) * ((new Date(t.completedAt) - new Date(t.createdAt)) / planned);
+      }, 0) / sumW(done)
+    : null;
   const completeSpeedScore = avgRatio === null ? null : clamp(100 - (avgRatio - 0.5) * 100);
 
   const lateDays = done
@@ -56,7 +61,7 @@ function computeMetrics(tasks, now = new Date()) {
   const avgDelayDays = allLate.length ? avg(allLate) : 0;
 
   const rated = done.filter((t) => t.qualityScore);
-  const avgQuality = avg(rated.map((t) => t.qualityScore));
+  const avgQuality = rated.length ? rated.reduce((s, t) => s + w(t) * t.qualityScore, 0) / sumW(rated) : null;
   const qualityScore = avgQuality === null ? null : (avgQuality / 5) * 100;
 
   const totalReturns = tasks.reduce((s, t) => s + (t.returnCount || 0), 0);

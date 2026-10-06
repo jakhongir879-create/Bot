@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { api, setToken } from '../api.js';
 
-export default function Login({ onSuccess }) {
+export default function Login({ onSuccess, notice }) {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(notice || null);
   const [busy, setBusy] = useState(false);
 
   const submit = async (e) => {
@@ -31,6 +31,9 @@ export default function Login({ onSuccess }) {
           Davom etish uchun tizimga kiring
         </p>
         {error && <div className="alert">{error}</div>}
+        <div className="alert info small" style={{ marginBottom: 16 }}>
+          Bo'lim boshlig'imisiz? Telegram botda <b>«💻 Kompyuterda ochish»</b> tugmasini bosing — parolsiz kirasiz.
+        </div>
         <label className="field">
           <span>Login</span>
           <input className="input" value={login} onChange={(e) => setLogin(e.target.value)} autoComplete="username" autoFocus />

@@ -1217,3 +1217,27 @@ body::after {
   color: var(--text);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
 }
+
+/* Segmentli tanlash (muhimlik, KPI og'irligi) */
+.seg {
+  display: flex;
+  background: var(--card-2);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  padding: 3px;
+}
+
+.seg button {
+  flex: 1;
+  padding: 8px 6px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-2);
+}
+
+.seg button.active {
+  background: var(--solid);
+  color: var(--text);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}

@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { X, Sparkles, RefreshCw, Star, BarChart3, Lightbulb, CheckCircle2 } from 'lucide-react';
 import { api } from '../api.js';
 import { formatDateTime, chartColors } from '../utils.js';
+import { useViewer } from '../viewer.js';
 
 const AI_HEADS = [
   { emoji: '📊', Icon: BarChart3, color: '#2a78d6' },
@@ -144,8 +145,13 @@ export function AiText({ text }) {
   );
 }
 
-/** Modul bo'yicha oxirgi AI hisobot va "AI tahlil" tugmasi */
-export function AiBlock({ module, title = 'AI tahlil', compact = false }) {
+/** Modul bo'yicha oxirgi AI hisobot va "AI tahlil" tugmasi (faqat direktor uchun) */
+export function AiBlock(props) {
+  const viewer = useViewer();
+  return viewer.isDirector ? <AiBlockInner {...props} /> : null;
+}
+
+function AiBlockInner({ module, title = 'AI tahlil', compact = false }) {
   const [report, setReport] = useState(null);
   const [enabled, setEnabled] = useState(true);
   const [busy, setBusy] = useState(false);

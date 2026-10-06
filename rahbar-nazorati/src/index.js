@@ -86,7 +86,10 @@ async function ensureBaseRecords() {
 }
 
 async function setupBotMenu() {
-  await bot.api.setMyCommands([{ command: 'start', description: 'Bosh menyu' }]);
+  await bot.api.setMyCommands([
+    { command: 'start', description: 'Bosh menyu' },
+    { command: 'panel', description: 'Kompyuter paneli (rahbarlar uchun)' },
+  ]);
   if (config.webappUrl.startsWith('https://')) {
     await bot.api.setChatMenuButton({ menu_button: { type: 'web_app', text: 'Ilova', web_app: { url: `${config.webappUrl}/app/` } } });
     console.log(`📱 Mini App tugmasi ulandi: ${config.webappUrl}/app/`);

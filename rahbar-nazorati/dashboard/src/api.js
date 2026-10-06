@@ -39,7 +39,7 @@ async function request(method, path, body, { raw = false } = {}) {
   } catch {
     throw new Error("Server bilan aloqa yo'q. Backend ishga tushganini tekshiring.");
   }
-  if (response.status === 401 && path !== '/login') {
+  if (response.status === 401 && path !== '/login' && path !== '/magic') {
     setToken(null);
     onUnauthorized();
   }
@@ -61,6 +61,11 @@ function qs(params = {}) {
 
 export const api = {
   login: (login, password) => request('POST', '/login', { login, password }),
+  magic: (token) => request('POST', '/magic', { token }),
+  me: () => request('GET', '/me'),
+  assignees: () => request('GET', '/assignees'),
+  createTask: (data) => request('POST', '/tasks', data),
+  taskAction: (id, data) => request('POST', `/tasks/${id}/action`, data),
   overview: () => request('GET', '/overview'),
   tasks: (filters) => request('GET', `/tasks${qs(filters)}`),
   task: (id) => request('GET', `/tasks/${id}`),

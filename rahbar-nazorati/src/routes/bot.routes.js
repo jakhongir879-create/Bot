@@ -6,6 +6,7 @@ function registerBotRoutes() {
   bot.command('menu', botController.handleStart);
   bot.command('brifing', botController.handleBriefCommand);
   bot.command('yangi', botController.handleResetCommand);
+  bot.command('panel', botController.handlePanelCommand);
   bot.on('message:contact', botController.handleContact);
   bot.on(['message:document', 'message:photo', 'message:video'], botController.handleIncomingFile);
   bot.on('message:text', botController.handleText);

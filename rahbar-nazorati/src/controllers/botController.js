@@ -9,6 +9,7 @@ const stockService = require('../services/stock.service');
 const ai = require('../services/ai.service');
 const agent = require('../services/agent.service');
 const brief = require('../services/brief.service');
+const { createMagicToken } = require('../middlewares/adminAuth.middleware');
 const { STATUS_ICONS, STATUS_LABELS, PRIORITY_ICONS, PRIORITY_LABELS, ROLE_LABELS, MODULE_LABELS } = require('../utils/labels');
 const {
   escapeHtml,
@@ -28,6 +29,7 @@ const BTN = {
   MINE: '📋 Mening vazifalarim',
   REPORT: '📊 Hisobot',
   APP: '📱 Ilovani ochish',
+  PC: '💻 Kompyuterda ochish',
 };
 
 /* Foydalanuvchi holati (bosqichma-bosqich dialoglar uchun) */
@@ -44,9 +46,9 @@ setInterval(() => {
 function mainMenu(employee) {
   const kb = new Keyboard();
   if (employee.role === 'DIRECTOR') {
-    kb.text(BTN.ASSIGN).text(BTN.GIVEN).row().text(BTN.REPORT).text(BTN.APP);
+    kb.text(BTN.ASSIGN).text(BTN.GIVEN).row().text(BTN.REPORT).text(BTN.APP).row().text(BTN.PC);
   } else if (employee.role === 'TOP') {
-    kb.text(BTN.ASSIGN).text(BTN.GIVEN).row().text(BTN.REPORT).text(BTN.APP).row().text(BTN.MINE);
+    kb.text(BTN.ASSIGN).text(BTN.GIVEN).row().text(BTN.REPORT).text(BTN.APP).row().text(BTN.MINE).text(BTN.PC);
   } else {
     kb.text(BTN.MINE).text(BTN.APP);
   }
@@ -145,6 +147,23 @@ async function openApp(ctx) {
     return ctx.reply("📱 Ilova hali ulanmagan. Administrator .env faylga WEBAPP_URL (ngrok manzili) ni yozishi kerak.");
   }
   return ctx.reply('Ilovani ochish uchun tugmani bosing 👇', { reply_markup: keyboard });
+}
+
+async function openPanel(ctx, employee) {
+  const base = config.webappUrl || `http://localhost:${config.port}`;
+  const link = `${base}/dashboard/?t=${createMagicToken(employee)}`;
+  const text = [
+    '💻 <b>Kompyuter paneli</b>',
+    '',
+    "Havolani kompyuterda (Chrome yoki Edge) oching — parol kerak emas.",
+    employee.role === 'TOP' ? "Panelda faqat o'z jamoangiz vazifalari va natijalari ko'rinadi." : null,
+    '',
+    `<code>${escapeHtml(link)}</code>`,
+    '',
+    "⏳ Havola 10 daqiqa amal qiladi va faqat bir marta ishlaydi.",
+  ].filter((l) => l !== null).join('\n');
+  const markup = base.startsWith('https://') ? new InlineKeyboard().url('💻 Panelni ochish', link) : undefined;
+  return ctx.reply(text, { parse_mode: 'HTML', reply_markup: markup, link_preview_options: { is_disabled: true } });
 }
 
 function taskLine(task, showAssignee) {
@@ -601,7 +620,7 @@ function draftCard(draft) {
     `📌 <b>${escapeHtml(d.title)}</b>`,
   ];
   if (d.description) lines.push(`<i>${escapeHtml(d.description)}</i>`);
-  lines.push(`⏰ Deadline: ${formatDateTime(d.deadline)} (${timeLeft(d.deadline)})`, `${PRIORITY_ICONS[d.priority]} Muhimlik: ${PRIORITY_LABELS[d.priority]}`);
+  lines.push(`⏰ Deadline: ${formatDateTime(d.deadline)} (${timeLeft(d.deadline)})`, `${PRIORITY_ICONS[d.priority]} Muhimlik: ${PRIORITY_LABELS[d.priority]}`, `🎯 KPI og'irligi: ${Task.normalizeWeight(d.kpiWeight, d.priority)}/5`);
   return lines.join('\n');
 }
 
@@ -645,6 +664,7 @@ async function handleDraftCallback(ctx, employee, action, id) {
     assigneeId: d.assigneeId,
     deadline: d.deadline,
     priority: d.priority,
+    kpiWeight: d.kpiWeight,
   });
   await notify.taskCreated(task);
   const warn = task.assignee.telegramId ? '' : "\n⚠️ Ijrochi hali botga ulanmagan — /start bosgach xabarni oladi.";
@@ -679,6 +699,7 @@ async function handleText(ctx) {
   if (isMenuButton && session) clearSession(ctx.from.id);
 
   if (text === BTN.APP) return openApp(ctx);
+  if (text === BTN.PC && employee.role !== 'MIDDLE') return openPanel(ctx, employee);
   if (text === BTN.MINE) return showMyTasks(ctx, employee);
   if (text === BTN.GIVEN && employee.role !== 'MIDDLE') return showGivenTasks(ctx, employee);
   if (text === BTN.ASSIGN) return startAssign(ctx, employee);
@@ -761,7 +782,15 @@ async function handleResetCommand(ctx) {
   return ctx.reply("🧹 AI bilan suhbat tozalandi. Yangi mavzuda yozishingiz mumkin.");
 }
 
+async function handlePanelCommand(ctx) {
+  const employee = await requireEmployee(ctx);
+  if (!employee) return null;
+  if (employee.role === 'MIDDLE') return ctx.reply("Kompyuter paneli direktor va bo'lim boshliqlari uchun.");
+  return openPanel(ctx, employee);
+}
+
 module.exports = {
+  handlePanelCommand,
   handleBriefCommand,
   handleResetCommand,
   handleStart,

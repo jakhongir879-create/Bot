@@ -21,7 +21,7 @@ function taskCard(task, { withStatus = true } = {}) {
   if (task.assigner) lines.push(`👤 Beruvchi: ${escapeHtml(task.assigner.fullName)}`);
   if (task.assignee) lines.push(`👷 Ijrochi: ${escapeHtml(task.assignee.fullName)}`);
   lines.push(`⏰ Deadline: ${formatDateTime(task.deadline)} (${timeLeft(task.deadline)})`);
-  lines.push(`${PRIORITY_ICONS[task.priority]} Muhimlik: ${PRIORITY_LABELS[task.priority]}`);
+  lines.push(`${PRIORITY_ICONS[task.priority]} Muhimlik: ${PRIORITY_LABELS[task.priority]} · 🎯 KPI: ${task.kpiWeight || 3}/5`);
   if (withStatus) {
     const progress = task.status === 'JARAYONDA' ? ` (${task.progress}%)` : '';
     lines.push(`📍 Holat: ${STATUS_ICONS[task.status]} ${STATUS_LABELS[task.status]}${progress}`);

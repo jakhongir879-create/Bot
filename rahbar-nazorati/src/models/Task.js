@@ -44,7 +44,16 @@ function getDetail(id) {
   });
 }
 
-async function createTask({ title, description, assignerId, assigneeId, deadline, priority }) {
+const PRIORITY_WEIGHT = { PAST: 2, ORTA: 3, YUQORI: 4 };
+
+/** KPI og'irligi 1–5; berilmasa muhimlik darajasidan olinadi */
+function normalizeWeight(value, priority) {
+  const n = Math.round(Number(value));
+  if (value !== undefined && value !== null && value !== '' && n >= 1 && n <= 5) return n;
+  return PRIORITY_WEIGHT[priority] || 3;
+}
+
+async function createTask({ title, description, assignerId, assigneeId, deadline, priority, kpiWeight }) {
   if (!title || !String(title).trim()) throw new TaskError('Vazifa sarlavhasi kiritilmagan');
   if (!deadline || Number.isNaN(new Date(deadline).getTime())) throw new TaskError("Deadline noto'g'ri");
   if (!PRIORITIES.includes(priority)) priority = 'ORTA';
@@ -56,6 +65,7 @@ async function createTask({ title, description, assignerId, assigneeId, deadline
       assigneeId: Number(assigneeId),
       deadline: new Date(deadline),
       priority,
+      kpiWeight: normalizeWeight(kpiWeight, priority),
       history: { create: { changedBy: assignerId, newStatus: 'YANGI', comment: 'Vazifa yaratildi' } },
     },
     include: withPeople,
@@ -213,6 +223,7 @@ function recentForAssigner(employeeId, take = 15) {
 }
 
 module.exports = {
+  normalizeWeight,
   ACTIVE_STATUSES,
   FINAL_STATUSES,
   REASONS,

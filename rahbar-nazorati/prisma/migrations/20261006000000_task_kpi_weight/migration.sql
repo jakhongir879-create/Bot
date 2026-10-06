@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Task" ADD COLUMN     "kpiWeight" INTEGER NOT NULL DEFAULT 3;
